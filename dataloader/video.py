@@ -5,14 +5,14 @@ decord.bridge.set_bridge("torch")
 
 
 class VideoParser():
-    def __init__(self, path, video_timestamp, start_timestamp) -> None:
+    def __init__(self, path, video_timestamp, start_timestamp):
         self.begin_timestamp = video_timestamp
         self.vr = decord.VideoReader(path, ctx=decord.cpu())
 
         self.actual_start_index = round(
             (start_timestamp - video_timestamp) / (1000 / 60.0))
 
-    def __len__(self) -> int:
+    def __len__(self):
         # last three frames are not working
         return len(self.vr) - 24 - self.actual_start_index - 3
 

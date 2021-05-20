@@ -1,5 +1,4 @@
 import dill
-from torch.utils import data
 from torch.utils.data import Dataset
 
 from video import VideoParser

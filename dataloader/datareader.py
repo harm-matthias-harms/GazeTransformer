@@ -2,7 +2,7 @@ import pandas as pd
 
 
 class DataReader():
-    def __init__(self, path, sep, startTimestamp) -> None:
+    def __init__(self, path, sep, startTimestamp):
         self.df = pd.read_csv(path, sep=sep, index_col=False)
         self.timestamp_name = 'Timestamp' if 'Timestamp' in self.df.columns else 'Time'
 
