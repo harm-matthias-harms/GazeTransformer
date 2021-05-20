@@ -6,23 +6,23 @@ from utility import get_filenames, get_start_timestamps, get_video_timstamps, ge
 from dataset import FeatureDataset, VideoDataset
 
 
-def loadTrainingData(datasetDir, batch_size):
+def loadTrainingData(datasetDir, batch_size, num_workers):
     trainingX = torch.from_numpy(np.load(datasetDir + 'trainingX.npy')).float()
     trainingY = torch.from_numpy(np.load(datasetDir + 'trainingY.npy')).float()
 
     dataset = FeatureDataset(trainingX, trainingY)
-    return DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    return DataLoader(dataset=dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
-def loadTestData(datasetDir, batch_size):
+def loadTestData(datasetDir, batch_size, num_workers):
     testX = torch.from_numpy(np.load(datasetDir + 'testX.npy')).float()
     testY = torch.from_numpy(np.load(datasetDir + 'testY.npy')).float()
 
     dataset = FeatureDataset(testX, testY)
-    return DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False, drop_last=True)
+    return DataLoader(dataset=dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False, drop_last=True)
 
 
-def loadImageTrainingData(batch_size, should_train, sequence_prefix='../dataset/dataset/FixationNet_150_Images/'):
+def loadImageTrainingData(should_train, batch_size, num_workers, sequence_prefix='../dataset/dataset/FixationNet_150_Images/'):
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
     start_timestamps = get_start_timestamps()
@@ -34,10 +34,10 @@ def loadImageTrainingData(batch_size, should_train, sequence_prefix='../dataset/
             datasets.append(dataset)
 
     concatenated_datasets = ConcatDataset(datasets)
-    return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, shuffle=True, drop_last=True)
+    return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
-def loadImageTestData(batch_size, should_train, sequence_prefix='../dataset/dataset/FixationNet_150_Images/'):
+def loadImageTestData(should_train, batch_size, num_workers, sequence_prefix='../dataset/dataset/FixationNet_150_Images/'):
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
     start_timestamps = get_start_timestamps()
@@ -49,4 +49,4 @@ def loadImageTestData(batch_size, should_train, sequence_prefix='../dataset/data
             datasets.append(dataset)
 
     concatenated_datasets = ConcatDataset(datasets)
-    return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, shuffle=False, drop_last=True)
+    return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=False, drop_last=True)
