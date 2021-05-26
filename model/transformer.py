@@ -1,3 +1,4 @@
+import os
 from torch.nn import Transformer
 from torch.optim import AdamW
 import pytorch_lightning as pl
@@ -27,10 +28,10 @@ class GazeTransformer(pl.LightningModule):
         return t_opt
 
     def train_dataloader(self):
-        return loadTrainingData('../data')
+        return loadTrainingData(os.path.join(os.path.dirname(__file__), "../dataset/dataset/FixationNet_150_CrossScene/FixationNet_150_Scene1/"), 512, 10)
 
     def val_dataloader(self):
-        pass
+        return loadTestData(os.path.join(os.path.dirname(__file__), "../dataset/dataset/FixationNet_150_CrossScene/FixationNet_150_Scene1/"), 512, 10)
 
     def test_dataloader(self):
-        pass
+        return loadTestData(os.path.join(os.path.dirname(__file__), "../dataset/dataset/FixationNet_150_CrossScene/FixationNet_150_Scene1/"), 512, 10)
