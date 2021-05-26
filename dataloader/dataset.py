@@ -13,7 +13,10 @@ class FeatureDataset(Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-        return self.features[idx], self.labels[idx]
+        return {
+            'sequence': self.features[idx],
+            'label': self.labels[idx]
+        }
 
 
 class VideoDataset(Dataset):

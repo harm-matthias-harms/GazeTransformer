@@ -4,6 +4,7 @@ from torch.optim import AdamW
 import pytorch_lightning as pl
 
 from dataloader.loader import loadTrainingData, loadTestData
+from loss import AngularLoss
 
 
 class GazeTransformer(pl.LightningModule):
@@ -12,16 +13,31 @@ class GazeTransformer(pl.LightningModule):
         pass
 
     def forward(self, src, tgt):
-        pass
+        return self.transformer(src, tgt)
 
     def training_step(self, batch, batch_idx):
-        pass
+        src = batch['sequence']
+        tgt = batch['label']
+        pred = self(src, tgt)
+        loss = AngularLoss(pred, tgt)
+        self.log('train_loss', loss)
+        return loss
 
     def validation_step(self, batch, batch_idx):
-        pass
+        src = batch['sequence']
+        tgt = batch['label']
+        pred = self(src, tgt)
+        val_loss = AngularLoss(pred, tgt)
+        self.log('val_loss', val_loss)
+        return val_loss
 
     def test_step(self, batch, batch_idx):
-        pass
+        src = batch['sequence']
+        tgt = batch['label']
+        pred = self(src, tgt)
+        test_loss = AngularLoss(pred, tgt)
+        self.log('test_loss', test_loss)
+        return test_loss
 
     def configure_optimizers(self):
         t_opt = AdamW(self.transformer.parameters())
