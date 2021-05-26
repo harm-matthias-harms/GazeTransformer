@@ -1,5 +1,8 @@
 from torch.nn import Transformer
+from torch.optim import AdamW
 import pytorch_lightning as pl
+
+from dataloader.loader import loadTrainingData, loadTestData
 
 
 class GazeTransformer(pl.LightningModule):
@@ -20,10 +23,11 @@ class GazeTransformer(pl.LightningModule):
         pass
 
     def configure_optimizers(self):
-        pass
+        t_opt = AdamW(self.transformer.parameters())
+        return t_opt
 
     def train_dataloader(self):
-        pass
+        return loadTrainingData('../data')
 
     def val_dataloader(self):
         pass
