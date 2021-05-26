@@ -4,13 +4,13 @@ from torch.optim import AdamW
 import pytorch_lightning as pl
 
 from dataloader.loader import loadTrainingData, loadTestData
-from loss import AngularLoss
+from .loss import AngularLoss
 
 
 class GazeTransformer(pl.LightningModule):
     def __init__(self):
+        super().__init__()
         self.transformer = Transformer()
-        pass
 
     def forward(self, src, tgt):
         return self.transformer(src, tgt)

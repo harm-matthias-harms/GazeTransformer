@@ -2,9 +2,9 @@ import progressbar
 import dill
 import numpy as np
 
-from utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
-from video import VideoParser
-from datareader import DataReader
+from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
+from .video import VideoParser
+from .datareader import DataReader
 
 GENERATE_PATH = '../dataset/dataset/FixationNet_150_Images/'
 

@@ -2,8 +2,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, ConcatDataset
 
-from utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
-from dataset import FeatureDataset, VideoDataset
+from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
+from .dataset import FeatureDataset, VideoDataset
 
 
 def loadTrainingData(datasetDir, batch_size, num_workers):

@@ -106,3 +106,4 @@ data/
 dataset/
 dataloader/test_with_saliency.py
 dataloader/test_with_image.py
+lightning_logs/

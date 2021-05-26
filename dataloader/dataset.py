@@ -1,7 +1,7 @@
 import dill
 from torch.utils.data import Dataset
 
-from video import VideoParser
+from .video import VideoParser
 
 
 class FeatureDataset(Dataset):
