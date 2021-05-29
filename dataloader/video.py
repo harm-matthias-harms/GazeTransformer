@@ -14,12 +14,13 @@ class VideoParser():
 
     def __len__(self):
         # last three frames are not working
-        return len(self.vr) - 24 - self.actual_start_index - 3
+        # -9 because we need data for target from 150ms in the future
+        return len(self.vr) - 24 - self.actual_start_index - 3 - 9
 
     def get_timestamp(self, idx):
         idx += 24 + self.actual_start_index
-        return self.video_timestamp + round(idx * (1000 / 60.0))
+        return self.begin_timestamp + round(idx * (1000 / 60.0))
 
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
-        return resize(self.vr.get_batch([idx - 24, idx - 12, idx]).permute(0, 3, 1, 2), 224)
+        return resize(self.vr.get_batch([idx - 24, idx - 12, idx, idx + 9]).permute(0, 3, 1, 2), 224)
