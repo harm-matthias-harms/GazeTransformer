@@ -2,9 +2,9 @@ import progressbar
 import dill
 import numpy as np
 
-from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
-from .video import VideoParser
-from .datareader import DataReader
+from utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
+from video import VideoParser
+from datareader import DataReader
 
 GENERATE_PATH = '../dataset/dataset/FixationNet_150_Images/'
 
@@ -25,13 +25,19 @@ if __name__ == '__main__':
             timestamp = video.get_timestamp(i)
             #video_data = video.get_frames(i)
             try:
-                gaze_label = gazeReader.get_label(timestamp)
                 gaze_data = gazeReader.get_data_for_timestamp(timestamp)
                 head_data = headReader.get_data_for_timestamp(timestamp)
                 task_data = taskReader.get_data_for_timestamp(timestamp)
 
+                gaze_label = gazeReader.get_label(timestamp)
+                head_label = headReader.get_label(timestamp)
+                task_label = taskReader.get_label(timestamp)
+
+                task_data = task_data.reshape((40, 5, 4))[:, :3, :].flatten()
+                task_label = task_label[:12]
+
                 sample = {
-                    'label': gaze_label,
+                    'label': np.concatenate((gaze_label, head_label, task_label)),
                     'sequence': np.concatenate((gaze_data, head_data, task_data)),
                     # 'images': video_data.to('cpu')
                 }
