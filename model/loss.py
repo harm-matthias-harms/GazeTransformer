@@ -67,9 +67,8 @@ def CalAngularDist(x, y, eps=1e-6):
     ScreenCenterY = 0.5*ScreenHeight
     # the pixel distance between eye and the screen center.
     ScreenDist = 0.5 * ScreenHeight/math.tan(VerticalFov/2)
-
-    x1, x2 = x.split(1, 1)
-    y1, y2 = y.split(1, 1)
+    x1, x2 = x.split(1, -1)
+    y1, y2 = y.split(1, -1)
     # transform the angular coords to screen coords.
     # the X coord.
     x1 = ScreenDist * torch.tan(math.pi*x1 / 180) + 0.5*ScreenWidth
