@@ -1,22 +1,8 @@
 import dill
+import torch
 from torch.utils.data import Dataset
 
 from .video import VideoParser
-
-
-class FeatureDataset(Dataset):
-    def __init__(self, features, labels):
-        self.features = features
-        self.labels = labels
-
-    def __len__(self):
-        return len(self.features)
-
-    def __getitem__(self, idx):
-        return {
-            'sequence': self.features[idx],
-            'label': self.labels[idx]
-        }
 
 
 class VideoDataset(Dataset):
@@ -30,5 +16,14 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         data_point = self.data[idx]
-        data_point['images'] = self.video.get_frames(idx)
-        return data_point
+        return {
+            'sequence': self.feature_to_sequence(torch.tensor(data_point['sequence'])),
+            'label': torch.tensor([data_point['label']]),
+            'images': self.video.get_frames(data_point['video'])
+        }
+
+    def feature_to_sequence(self, feature):
+        gazes = torch.reshape(feature[:80], (40, 2))
+        head = torch.reshape(feature[80:160], (40, 2))
+        task = torch.reshape(feature[160: 640], (40, 12))
+        return torch.cat((gazes, head, task), 1)

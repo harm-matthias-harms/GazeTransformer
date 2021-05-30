@@ -23,7 +23,6 @@ if __name__ == '__main__':
         taskReader = DataReader(files[3], ",", max_timestamps[idx])
         for i in progressbar.progressbar(range(len(video))):
             timestamp = video.get_timestamp(i)
-            # video_data = video.get_frames(i)
             try:
                 gaze_data = gazeReader.get_data_for_timestamp(timestamp)
                 head_data = headReader.get_data_for_timestamp(timestamp)
