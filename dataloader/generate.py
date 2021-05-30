@@ -23,7 +23,7 @@ if __name__ == '__main__':
         taskReader = DataReader(files[3], ",", max_timestamps[idx])
         for i in progressbar.progressbar(range(len(video))):
             timestamp = video.get_timestamp(i)
-            #video_data = video.get_frames(i)
+            # video_data = video.get_frames(i)
             try:
                 gaze_data = gazeReader.get_data_for_timestamp(timestamp)
                 head_data = headReader.get_data_for_timestamp(timestamp)
@@ -39,12 +39,17 @@ if __name__ == '__main__':
                 sample = {
                     'label': np.concatenate((gaze_label, head_label, task_label)),
                     'sequence': np.concatenate((gaze_data, head_data, task_data)),
-                    # 'images': video_data.to('cpu')
+                    'video': i
                 }
+
+                if sample['label'].shape != (16,):
+                    raise "label not right shape"
+                if sample['sequence'].shape != (640, ):
+                    raise "sequence not right shape"
+
                 result.append(sample)
             except:
                 pass
-
         filename = GENERATE_PATH + get_sequence_name(files[0])
         with open(filename, "wb") as f:
             dill.dump(result, f)
