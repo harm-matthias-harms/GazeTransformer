@@ -23,4 +23,4 @@ class VideoParser():
 
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
-        return resize(self.vr.get_batch([idx - 24, idx - 12, idx, idx + 9]).permute(0, 3, 1, 2), 224)
+        return resize(self.vr.get_batch([idx - 24, idx - 12, idx + 9]).permute(0, 3, 1, 2), 224)
