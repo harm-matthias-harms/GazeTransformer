@@ -30,7 +30,7 @@ if __name__ == '__main__':
         out = cv2.VideoWriter(
             filename, cv2.VideoWriter_fourcc(*'mp4v'), 60, (24, 24), 0)
 
-        batches = [list(range(video_length))[i * batch_size:(i + 1) * n]
+        batches = [list(range(video_length))[i * batch_size:(i + 1) * batch_size]
                    for i in range((video_length + batch_size - 1) // batch_size)]
         for batch in progressbar.progressbar(batches):
             images = video.get_batch(batch).float()
