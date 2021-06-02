@@ -16,10 +16,10 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         data_point = self.data[idx]
+        sequence = self.feature_to_sequence(torch.FloatTensor(data_point['sequence']))
+        label = torch.FloatTensor([data_point['label']])
         return {
-            'sequence': self.feature_to_sequence(torch.tensor(data_point['sequence'])),
-            'label': torch.tensor([data_point['label']]),
-            'images': self.video.get_frames(data_point['video'])
+            'label': label,
         }
 
     def feature_to_sequence(self, feature):

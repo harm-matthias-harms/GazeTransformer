@@ -16,7 +16,6 @@ def loadTrainingData(should_train, batch_size, num_workers, sequence_prefix='../
             dataset = VideoDataset(files[0], os.path.join(os.path.dirname(
                 __file__), sequence_prefix) + get_sequence_name(files[0]), video_timestamps[idx], start_timestamps[idx])
             datasets.append(dataset)
-            break
 
     concatenated_datasets = ConcatDataset(datasets)
     return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
@@ -32,7 +31,6 @@ def loadTestData(should_train, batch_size, num_workers, sequence_prefix='../data
             dataset = VideoDataset(files[0], os.path.join(os.path.dirname(
                 __file__), sequence_prefix) + get_sequence_name(files[0]), video_timestamps[idx], start_timestamps[idx])
             datasets.append(dataset)
-            break
 
     concatenated_datasets = ConcatDataset(datasets)
     return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=False, drop_last=True)
