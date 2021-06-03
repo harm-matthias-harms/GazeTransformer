@@ -2,12 +2,17 @@ import dill
 import torch
 from torch.utils.data import Dataset
 
-from .video import VideoParser
+from .video import VideoParser, SaliencyVideoParser
 
 
 class VideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp):
-        self.video = VideoParser(video_path, base_timestamp, start_timestamp)
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, is_saliency=False):
+        if is_saliency:
+            self.video = SaliencyVideoParser(
+                video_path, base_timestamp, start_timestamp)
+        else:
+            self.video = VideoParser(
+                video_path, base_timestamp, start_timestamp)
         with open(sequence_path, 'rb') as f:
             self.data = dill.load(f)
 
@@ -17,8 +22,10 @@ class VideoDataset(Dataset):
     def __getitem__(self, idx):
         data_point = self.data[idx]
         images = self.video.get_frames(data_point['video'])
-        sequence = self.feature_to_sequence(torch.FloatTensor(data_point['sequence']), images[:-1])
-        label = torch.cat((torch.FloatTensor([data_point['label']]), images[-1].flatten(1)), 1)
+        sequence = self.feature_to_sequence(
+            torch.FloatTensor(data_point['sequence']), images[:-1])
+        label = torch.cat(
+            (torch.FloatTensor([data_point['label']]), images[-1].flatten(1)), 1)
         return {
             'sequence': sequence,
             'label': label,
