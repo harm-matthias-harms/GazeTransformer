@@ -32,9 +32,9 @@ class VideoParser():
 class SaliencyVideoParser():
     def __init__(self, path, video_timestamp, start_timestamp):
         self.begin_timestamp = video_timestamp
-        self.data = read_video(path)[0].permute(0, 3, 1, 2)
-        # only keep one channel because of greyscale video
-        self.data = self.data[:, :, :, 0].float() / 255.0
+        self.data = read_video(path)[0]
+        self.data = self.data[:, :, :, :1] # only keep one channel because of greyscale video
+        self.data = self.data.permute(0, 3, 1, 2).float() / 255.0
 
         self.actual_start_index = round(
             (start_timestamp - video_timestamp) / (1000 / 60.0))
