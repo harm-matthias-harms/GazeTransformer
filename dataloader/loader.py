@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, ConcatDataset
 
-from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name
+from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name, get_saliency_path
 from .dataset import VideoDataset
 
 def loadTrainingData(should_train, batch_size, num_workers, sequence_prefix='../dataset/dataset/FixationNet_150_Images/'):
@@ -13,7 +13,7 @@ def loadTrainingData(should_train, batch_size, num_workers, sequence_prefix='../
     datasets = []
     for idx, files in enumerate(filenames):
         if should_train[idx]:
-            dataset = VideoDataset(files[0], os.path.join(os.path.dirname(
+            dataset = VideoDataset(get_saliency_path(files[0]), os.path.join(os.path.dirname(
                 __file__), sequence_prefix) + get_sequence_name(files[0]), video_timestamps[idx], start_timestamps[idx])
             datasets.append(dataset)
 
@@ -28,7 +28,7 @@ def loadTestData(should_train, batch_size, num_workers, sequence_prefix='../data
     datasets = []
     for idx, files in enumerate(filenames):
         if not should_train[idx]:
-            dataset = VideoDataset(files[0], os.path.join(os.path.dirname(
+            dataset = VideoDataset(get_saliency_path(files[0]), os.path.join(os.path.dirname(
                 __file__), sequence_prefix) + get_sequence_name(files[0]), video_timestamps[idx], start_timestamps[idx])
             datasets.append(dataset)
 
