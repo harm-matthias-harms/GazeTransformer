@@ -12,11 +12,12 @@ from .positional_encoding import PositionalEncoding
 class GazeTransformer(pl.LightningModule):
     def __init__(self, feature_number, batch_size=1, num_worker=0):
         super().__init__()
+        self.feature_number = feature_number
         self.batch_size = batch_size
         self.num_worker = num_worker
 
-        self.positional_encoding = PositionalEncoding(feature_number)
-        self.transformer = Transformer(d_model = feature_number)
+        self.positional_encoding = PositionalEncoding(self.feature_number)
+        self.transformer = Transformer(d_model = self.feature_number)
         self.loss = AngularLoss()
 
     def forward(self, src, tgt):
