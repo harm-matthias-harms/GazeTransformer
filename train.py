@@ -8,22 +8,24 @@ early_stopping_callback = EarlyStopping(
 )
 
 model_checkpoint_callback = ModelCheckpoint(
-  dirpath='./models/checkpoints/',
-  filename='saliency-{epoch}-{val_loss:.2f}',
-  monitor='val_loss',
-  mode='min',
-  verbose=True,
-  save_top_k=1,
+    dirpath='./model/checkpoints/saliency',
+    filename='{epoch}-{val_loss:.2f}',
+    monitor='val_loss',
+    mode='min',
+    verbose=True,
+    save_top_k=1,
 )
 
-model = GazeTransformer(592, 256)
-trainer = pl.Trainer(gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback])
+model = GazeTransformer(592, batch_size=128, num_worker=12)
+trainer = pl.Trainer(
+    gpus=-1)#, callbacks=[early_stopping_callback, model_checkpoint_callback])
 
 trainer.fit(model)
 
-best_model = GazeTransformer.load_from_checkpoint(model_checkpoint_callback.best_model_path)
+# best_model = model.load_from_checkpoint(
+#     model_checkpoint_callback.best_model_path)
 
-trainer.test(model)
+# trainer.test(model)
 
 
 # possible improvements, when we need to run with small batchsize

@@ -24,8 +24,7 @@ class VideoDataset(Dataset):
         images = self.video.get_frames(data_point['video'])
         sequence = self.feature_to_sequence(
             torch.FloatTensor(data_point['sequence']), images[:-1])
-        label = torch.cat(
-            (torch.FloatTensor([data_point['label']]), images[-1].flatten(1)), 1)
+        label = torch.cat((torch.FloatTensor([data_point['label']]), images[-1].flatten(1)), 1)#, torch.zeros(1, 8)), 1) #  torch.FloatTensor([data_point['label']])
         return {
             'sequence': sequence,
             'label': label,
@@ -39,4 +38,4 @@ class VideoDataset(Dataset):
         gazes = torch.reshape(feature[:80], (40, 2))
         head = torch.reshape(feature[80:160], (40, 2))
         task = torch.reshape(feature[160: 640], (40, 12))
-        return torch.cat((gazes, head, task, images), 1)
+        return torch.cat((gazes, head, task, images), 1) # ), 1) # 
