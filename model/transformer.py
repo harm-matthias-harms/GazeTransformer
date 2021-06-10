@@ -1,4 +1,4 @@
-from torch.nn import  MSELoss
+from torch.nn import MSELoss, TransformerEncoderLayer, TransformerEncoder
 from torch.optim import AdamW
 import pytorch_lightning as pl
 
@@ -6,7 +6,7 @@ from dataloader.loader import loadTrainingData, loadTestData
 from dataloader.utility import get_user_labels
 from .loss import AngularLoss
 from .positional_encoding import PositionalEncoding, LearnedPositionalEncoding, Time2VecPositionalEncoding
-from .transformers import Transformer1, Transformer2, Transformer3
+from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
@@ -19,38 +19,38 @@ class GazeTransformer(pl.LightningModule):
         self.num_worker = num_worker
 
         self.positional_encoding = Time2VecPositionalEncoding(feature_number, self.pos_kernel_size)
-        self.transformer = Transformer2(self.feature_number)
+        encoder_layers = TransformerEncoderLayer(
+            self.feature_number, nhead=8, dim_feedforward=self.feature_number)
+        self.encoder = TransformerEncoder(encoder_layers, num_layers=6)
+        self.decoder = Head(self.feature_number)
         self.loss = MSELoss()
         self.angular_loss = AngularLoss()
 
-    def forward(self, src, tgt):
+    def forward(self, src):
         src = src.transpose(-3, -2)
-        tgt = tgt.transpose(-3, -2)
         src = self.positional_encoding(src)
-        return self.transformer(src, tgt)
+        memory = self.encoder(src).transpose(-2, -3)
+        return self.decoder(memory)
         
 
     def training_step(self, batch, batch_idx):
-        src = batch['sequence']
-        tgt = batch['label']
-        pred = self(src, tgt)
-        loss = self.angular_loss(pred, tgt[:, :, :2])
+        src, y = batch
+        pred = self(src)
+        loss = self.angular_loss(pred, y)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        src = batch['sequence']
-        tgt = batch['label']
-        pred = self(src, tgt)
-        val_loss = self.angular_loss(pred, tgt[:, :, :2])
+        src, y = batch
+        pred = self(src)
+        val_loss = self.angular_loss(pred, y)
         self.log('val_loss', val_loss)
         return val_loss
 
     def test_step(self, batch, batch_idx):
-        src = batch['sequence']
-        tgt = batch['label']
-        pred = self(src, tgt)
-        test_loss = self.angular_loss(pred, tgt[:, :, :2])
+        src, y = batch
+        pred = self(src)
+        test_loss = self.angular_loss(pred, y)
         self.log('test_loss', test_loss)
         return test_loss
 
