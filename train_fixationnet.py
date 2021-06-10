@@ -1,4 +1,4 @@
-from model.transformer import GazeTransformer
+from model.fixationnetpl import FixationNetPL
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -8,7 +8,7 @@ early_stopping_callback = EarlyStopping(
 )
 
 model_checkpoint_callback = ModelCheckpoint(
-    dirpath='./model/checkpoints/saliency',
+    dirpath='./model/checkpoints/fixationnet',
     filename='{epoch}-{val_loss:.2f}',
     monitor='val_loss',
     mode='min',
@@ -16,7 +16,7 @@ model_checkpoint_callback = ModelCheckpoint(
     save_top_k=1,
 )
 
-model = GazeTransformer(592, batch_size=256, num_worker=12)
+model = FixationNetPL(batch_size=512, num_worker=12)
 trainer = pl.Trainer(gpus=-1)#, callbacks=[early_stopping_callback, model_checkpoint_callback])
 
 trainer.fit(model)
