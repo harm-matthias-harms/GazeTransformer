@@ -20,7 +20,11 @@ class DataReader():
 
     def get_label(self, timestamp):
         idx = self._find_next_lower_neigbour(timestamp + 150)
-        return self.df.iloc[idx].drop([self.timestamp_name]).values.flatten()
+        return self.df.iloc[idx] \
+            .drop([self.timestamp_name]) \
+            .replace({'NONE': 0, 'Target': 1, 'Distractor': 2}) \
+            .values \
+            .flatten()
 
     def _cut_by_timestamp(self, timestamp):
         # - 10 because data is sampled every 10ms and we want the first element before timestamp in it

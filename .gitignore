@@ -104,3 +104,8 @@ ENV/
 .vscode
 data/
 dataset/
+dataloader/test_with_saliency.py
+dataloader/test_with_image.py
+model/transformers.py
+lightning_logs/
+**/checkpoints/
