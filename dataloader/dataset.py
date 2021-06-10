@@ -23,7 +23,7 @@ class TimeSequenceVideoDataset(Dataset):
         data_point = self.data[idx]
         images = self.video.get_frames(data_point['video'])
         sequence = self.feature_to_sequence(
-            torch.FloatTensor(data_point['sequence']), images[:-1])
+            torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label'][:2]])
         return sequence, label
 
@@ -55,7 +55,7 @@ class VideoDataset(Dataset):
         data_point = self.data[idx]
         images = self.video.get_frames(data_point['video'])
         sequence = self.feature_to_sequence(
-            torch.FloatTensor(data_point['sequence']), images[:-1])
+            torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label'][:2]])
         return sequence, label
 

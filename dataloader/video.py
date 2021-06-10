@@ -17,7 +17,7 @@ class VideoParser():
     def __len__(self):
         # last three frames are not working
         # -9 because we need data for target from 150ms in the future
-        return len(self.vr) - 24 - self.actual_start_index - 3 - 9
+        return len(self.vr) - 24 - self.actual_start_index - 3
 
     def get_timestamp(self, idx):
         idx += 24 + self.actual_start_index
@@ -25,7 +25,7 @@ class VideoParser():
 
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
-        batch = self.vr.get_batch([idx - 24, idx - 12, idx + 9])
+        batch = self.vr.get_batch([idx - 24, idx - 12])
         return TF.center_crop(batch.permute(0, 3, 1, 2), (256, 256)).float() / 255.0
 
 
@@ -42,7 +42,7 @@ class SaliencyVideoParser():
     def __len__(self):
         # last three frames are not working
         # -9 because we need data for target from 150ms in the future
-        return len(self.data) - 24 - self.actual_start_index - 3 - 9
+        return len(self.data) - 24 - self.actual_start_index - 3
 
     def get_timestamp(self, idx):
         idx += 24 + self.actual_start_index
@@ -51,5 +51,5 @@ class SaliencyVideoParser():
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
 
-        indices = torch.tensor([idx - 24, idx - 12, idx + 9])
+        indices = torch.tensor([idx - 24, idx - 12])
         return self.data.index_select(0, indices)
