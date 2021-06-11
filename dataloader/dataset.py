@@ -7,6 +7,7 @@ from .video import VideoParser, SaliencyVideoParser
 
 class TimeSequenceVideoDataset(Dataset):
     def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, is_saliency=False):
+        self.is_saliency = is_saliency
         if is_saliency:
             self.video = SaliencyVideoParser(
                 video_path, base_timestamp, start_timestamp)
@@ -22,20 +23,20 @@ class TimeSequenceVideoDataset(Dataset):
     def __getitem__(self, idx):
         data_point = self.data[idx]
         images = self.video.get_frames(data_point['video'])
-        sequence = self.feature_to_sequence(
-            torch.FloatTensor(data_point['sequence']), images)
+        sequence = self.feature_to_sequence(torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label'][:2]])
-        return sequence, label
+        return sequence, label, images
 
     def feature_to_sequence(self, feature, images):
-        images = images.flatten(1)
-        # time descending, last image -> first image
-        images = torch.cat((images[-1].repeat(20, 1), images[0].repeat(20, 1)))
-
         gazes = torch.reshape(feature[:80], (40, 2))
         head = torch.reshape(feature[80:160], (40, 2))
         task = torch.reshape(feature[160: 640], (40, 12))
-        return torch.cat((gazes, head, task, images), 1)
+        if self.is_saliency:
+            images = images.flatten(1)
+            # time descending, last image -> first image
+            images = torch.cat((images[-1].repeat(20, 1), images[0].repeat(20, 1)))
+            return torch.cat((gazes, head, task, images), 1)
+        return torch.cat((gazes, head, task), 1)
 
 class VideoDataset(Dataset):
     def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, is_saliency=False):
