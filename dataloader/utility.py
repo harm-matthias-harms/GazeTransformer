@@ -13,6 +13,7 @@ HEAD_DIR = 'HeadData'
 TASK_DIR = 'TaskData'
 LABEL_PATH = 'Labels/FixationNetDataset'
 SALIENCY_PATH = 'SaliencyVideos'
+CROPPED_PATH = 'CroppedVideos'
 
 
 def get_sequence_name(video_path):
@@ -67,3 +68,6 @@ def get_scene_labels(test_scene):
 
 def get_saliency_path(video_path):
     return os.path.join(os.path.dirname(__file__), DATASET_PATH, SALIENCY_PATH, video_path.split("bandicam ")[-1])
+
+def get_cropped_path(video_path):
+    return os.path.join(os.path.dirname(__file__), DATASET_PATH, CROPPED_PATH, video_path.split("bandicam ")[-1])
