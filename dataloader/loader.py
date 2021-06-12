@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, ConcatDataset
 
-from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name, get_saliency_path
+from .utility import get_filenames, get_start_timestamps, get_video_timstamps, get_sequence_name, get_saliency_path, get_cropped_path
 from .dataset import TimeSequenceVideoDataset, VideoDataset, FeatureDataset
 
 
@@ -18,7 +18,7 @@ def loadTrainingData(should_train, batch_size, num_workers, data_type: Literal['
     
     for idx, files in enumerate(filenames):
         if should_train[idx]:
-            video_path = files[0] if not data_type == 'saliency' else get_saliency_path(files[0])
+            video_path = get_cropped_path(files[0]) if not data_type == 'saliency' else get_saliency_path(files[0])
 
             dataset = dataset_type(
                 video_path,
@@ -44,7 +44,7 @@ def loadTestData(should_train, batch_size, num_workers, data_type: Literal['sali
 
     for idx, files in enumerate(filenames):
         if not should_train[idx]:
-            video_path = files[0] if not data_type == 'saliency' else get_saliency_path(files[0])
+            video_path = get_cropped_path(files[0]) if not data_type == 'saliency' else get_saliency_path(files[0])
 
             dataset = dataset_type(
                 video_path,

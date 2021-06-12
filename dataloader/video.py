@@ -26,8 +26,7 @@ class VideoParser():
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
         batch = self.vr.get_batch([idx - 24, idx - 12])
-        return TF.center_crop(batch.permute(0, 3, 1, 2), (256, 256)).float() / 255.0
-
+        return batch.permute(0, 3, 1, 2).float() / 255.0
 
 class SaliencyVideoParser():
     def __init__(self, path, video_timestamp, start_timestamp):
