@@ -8,11 +8,11 @@ from dataloader.utility import get_user_labels
 from .loss import AngularLoss
 from .positional_encoding import PositionalEncoding, LearnedPositionalEncoding, Time2VecPositionalEncoding
 from .head import Head
-from .image import FlattenImages
+from .image import FlattenImages, ImagePatches
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, feature_number, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['saliency', 'flatten'] = 'flatten'):
+    def __init__(self, feature_number, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['saliency', 'flatten', 'patches'] = 'patches'):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -31,6 +31,8 @@ class GazeTransformer(pl.LightningModule):
 
         if self.model_type == 'flatten':
             self.backbone = FlattenImages()
+        elif self.model_type == 'patches':
+            self.backbone = ImagePatches()
 
     def forward(self, src, images):
         src = src.transpose(-3, -2)
