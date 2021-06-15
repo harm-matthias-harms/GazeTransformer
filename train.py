@@ -16,7 +16,7 @@ model_checkpoint_callback = ModelCheckpoint(
     save_top_k=1,
 )
 
-model = GazeTransformer(592, batch_size=256, num_worker=12)
+model = GazeTransformer(batch_size=16)#, batch_size=256, num_worker=12)
 trainer = pl.Trainer(gpus=-1)#, callbacks=[early_stopping_callback, model_checkpoint_callback])
 
 trainer.fit(model)

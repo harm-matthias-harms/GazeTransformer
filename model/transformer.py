@@ -12,16 +12,16 @@ from .image import FlattenImages, ImagePatches
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, feature_number, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['saliency', 'flatten', 'patches'] = 'patches'):
+    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['saliency', 'flatten', 'patches'] = 'patches'):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
-        self.feature_number = feature_number + self.pos_kernel_size
         self.batch_size = batch_size
         self.num_worker = num_worker
         self.model_type = model_type
+        self.set_feature_number()
 
-        self.positional_encoding = Time2VecPositionalEncoding(feature_number, self.pos_kernel_size)
+        self.positional_encoding = Time2VecPositionalEncoding(self.feature_number - self.pos_kernel_size, self.pos_kernel_size)
         encoder_layers = TransformerEncoderLayer(
             self.feature_number, nhead=8, dim_feedforward=self.feature_number)
         self.encoder = TransformerEncoder(encoder_layers, num_layers=6)
@@ -81,3 +81,13 @@ class GazeTransformer(pl.LightningModule):
         if self.model_type == 'saliency':
             return 'saliency'
         return 'video'
+
+    def set_feature_number(self):
+        if self.model_type == 'saliency':
+            self.feature_number = 592
+        elif self.model_type == 'flatten':
+            self.feature_number = 1040
+        elif self.model_type == 'patches':
+            self.feature_number = 784
+            
+        self.feature_number += self.pos_kernel_size
