@@ -28,11 +28,12 @@ class VideoParser():
         batch = self.vr.get_batch([idx - 24, idx - 12])
         return batch.permute(0, 3, 1, 2).float() / 255.0
 
-class SaliencyVideoParser():
-    def __init__(self, path, video_timestamp, start_timestamp):
+class InMemoryVideoParser():
+    def __init__(self, path, video_timestamp, start_timestamp, grayscale):
         self.begin_timestamp = video_timestamp
         self.data = read_video(path)[0]
-        self.data = self.data[:, :, :, :1] # only keep one channel because of greyscale video
+        if grayscale:
+            self.data = self.data[:, :, :, :1] # only keep one channel because of greyscale video
         self.data = self.data.permute(0, 3, 1, 2).float() / 255.0
 
         self.actual_start_index = round(

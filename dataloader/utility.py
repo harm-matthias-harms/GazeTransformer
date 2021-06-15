@@ -1,4 +1,5 @@
 import os
+from typing_extensions import Literal
 
 import pandas as pd
 import numpy as np
@@ -12,8 +13,11 @@ VIDEO_DIR = 'Videos'
 HEAD_DIR = 'HeadData'
 TASK_DIR = 'TaskData'
 LABEL_PATH = 'Labels/FixationNetDataset'
+
 SALIENCY_PATH = 'SaliencyVideos'
 CROPPED_PATH = 'CroppedVideos'
+FLATTEN_PATH = 'FlattenedVideos'
+PATCH_PATH = 'PatchVideos'
 
 
 def get_sequence_name(video_path):
@@ -65,6 +69,18 @@ def get_scene_labels(test_scene):
     labels = pd.read_csv(os.path.join(
         os.path.dirname(__file__), DATASET_PATH, LABEL_PATH, 'SceneLabels.txt'), header=None)[0]
     return labels != test_scene
+
+def get_video_path(video_path, mode: Literal['saliency', 'flatten', 'patches', None]):
+    path = CROPPED_PATH
+    if mode == 'salience':
+        path = SALIENCY_PATH
+    elif mode == 'flatten':
+        path = FLATTEN_PATH
+    elif mode == 'patches':
+        path = PATCH_PATH
+    
+    return os.path.join(os.path.dirname(__file__), DATASET_PATH, path, video_path.split("bandicam ")[-1])
+
 
 def get_saliency_path(video_path):
     return os.path.join(os.path.dirname(__file__), DATASET_PATH, SALIENCY_PATH, video_path.split("bandicam ")[-1])
