@@ -2,15 +2,15 @@ import dill
 import torch
 from torch.utils.data import Dataset
 
-from .video import VideoParser, SaliencyVideoParser
+from .video import VideoParser, InMemoryVideoParser
 
 
 class TimeSequenceVideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, is_saliency=False):
-        self.is_saliency = is_saliency
-        if is_saliency:
-            self.video = SaliencyVideoParser(
-                video_path, base_timestamp, start_timestamp)
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False):
+        self.in_memory = in_memory
+        if in_memory:
+            self.video = InMemoryVideoParser(
+                video_path, base_timestamp, start_timestamp, grayscale)
         else:
             self.video = VideoParser(
                 video_path, base_timestamp, start_timestamp)
@@ -31,7 +31,7 @@ class TimeSequenceVideoDataset(Dataset):
         gazes = torch.reshape(feature[:80], (40, 2))
         head = torch.reshape(feature[80:160], (40, 2))
         task = torch.reshape(feature[160: 640], (40, 12))
-        if self.is_saliency:
+        if self.in_memory:
             images = images.flatten(1)
             # time descending, last image -> first image
             images = torch.cat((images[-1].repeat(20, 1), images[0].repeat(20, 1)))
@@ -39,10 +39,10 @@ class TimeSequenceVideoDataset(Dataset):
         return torch.cat((gazes, head, task), 1)
 
 class VideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, is_saliency=False):
-        if is_saliency:
-            self.video = SaliencyVideoParser(
-                video_path, base_timestamp, start_timestamp)
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False):
+        if in_memory:
+            self.video = InMemoryVideoParser(
+                video_path, base_timestamp, start_timestamp, grayscale)
         else:
             self.video = VideoParser(
                 video_path, base_timestamp, start_timestamp)

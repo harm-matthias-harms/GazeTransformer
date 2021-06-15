@@ -8,7 +8,6 @@ from dataloader.utility import get_user_labels
 from .loss import AngularLoss
 from .positional_encoding import PositionalEncoding, LearnedPositionalEncoding, Time2VecPositionalEncoding
 from .head import Head
-from .image import FlattenImages, ImagePatches
 
 
 class GazeTransformer(pl.LightningModule):
@@ -29,14 +28,9 @@ class GazeTransformer(pl.LightningModule):
         self.loss = MSELoss()
         self.angular_loss = AngularLoss()
 
-        if self.model_type == 'flatten':
-            self.backbone = FlattenImages()
-        elif self.model_type == 'patches':
-            self.backbone = ImagePatches()
-
     def forward(self, src, images):
         src = src.transpose(-3, -2)
-        if self.model_type != 'saliency':
+        if not self.model_type in ['saliency', 'flatten', 'patches']:
             src = self.backbone(src, images)
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
@@ -69,18 +63,13 @@ class GazeTransformer(pl.LightningModule):
         return t_opt
 
     def train_dataloader(self):
-        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, self.get_loader_data_type())
+        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def val_dataloader(self):
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.get_loader_data_type())
+        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def test_dataloader(self):
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.get_loader_data_type())
-
-    def get_loader_data_type(self):
-        if self.model_type == 'saliency':
-            return 'saliency'
-        return 'video'
+        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def set_feature_number(self):
         if self.model_type == 'saliency':
