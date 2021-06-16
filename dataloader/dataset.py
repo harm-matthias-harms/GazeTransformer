@@ -6,14 +6,17 @@ from .video import VideoParser, InMemoryVideoParser
 
 
 class TimeSequenceVideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False):
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False, ignore_images=False):
         self.in_memory = in_memory
-        if in_memory:
-            self.video = InMemoryVideoParser(
-                video_path, base_timestamp, start_timestamp, grayscale)
-        else:
-            self.video = VideoParser(
-                video_path, base_timestamp, start_timestamp)
+        self.ignore_images = ignore_images
+
+        if not self.ignore_images:
+            if in_memory:
+                self.video = InMemoryVideoParser(
+                    video_path, base_timestamp, start_timestamp, grayscale)
+            else:
+                self.video = VideoParser(
+                    video_path, base_timestamp, start_timestamp)
         with open(sequence_path, 'rb') as f:
             self.data = dill.load(f)
 
@@ -22,7 +25,10 @@ class TimeSequenceVideoDataset(Dataset):
 
     def __getitem__(self, idx):
         data_point = self.data[idx]
-        images = self.video.get_frames(data_point['video'])
+        if self.ignore_images:
+            images = torch.Tensor()
+        else:
+            images = self.video.get_frames(data_point['video'])
         sequence = self.feature_to_sequence(torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label'][:2]])
         return sequence, label, images
@@ -31,7 +37,7 @@ class TimeSequenceVideoDataset(Dataset):
         gazes = torch.reshape(feature[:80], (40, 2))
         head = torch.reshape(feature[80:160], (40, 2))
         task = torch.reshape(feature[160: 640], (40, 12))
-        if self.in_memory:
+        if not self.ignore_images and self.in_memory:
             images = images.flatten(1)
             # time descending, last image -> first image
             images = torch.cat((images[-1].repeat(20, 1), images[0].repeat(20, 1)))
