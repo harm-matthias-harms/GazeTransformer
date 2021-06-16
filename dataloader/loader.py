@@ -8,7 +8,7 @@ from .utility import get_filenames, get_start_timestamps, get_video_timstamps, g
 from .dataset import TimeSequenceVideoDataset, VideoDataset, FeatureDataset
 
 
-def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['saliency', 'flatten', 'patches'] = 'saliency', sequence_prefix='../dataset/dataset/FixationNet_150_Images/', as_row=False):
+def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/', as_row=False):
     datasets = []
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
@@ -27,7 +27,8 @@ def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['salie
                 video_timestamps[idx],
                 start_timestamps[idx],
                 in_memory=mode in ['saliency', 'flatten', 'patches'],
-                grayscale=mode in ['saliency', 'flatten']
+                grayscale=mode in ['saliency', 'flatten'],
+                ignore_images=mode == 'no-images'
             )
             datasets.append(dataset)
 
@@ -35,7 +36,7 @@ def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['salie
     return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
-def loadTestData(should_train, batch_size, num_workers, mode: Literal['saliency', 'flatten', 'patches'] = 'saliency', sequence_prefix='../dataset/dataset/FixationNet_150_Images/', as_row=False):
+def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/', as_row=False):
     datasets = []
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
@@ -54,7 +55,8 @@ def loadTestData(should_train, batch_size, num_workers, mode: Literal['saliency'
                 video_timestamps[idx],
                 start_timestamps[idx],
                 in_memory=mode in ['saliency', 'flatten', 'patches'],
-                grayscale=mode in ['saliency', 'flatten']
+                grayscale=mode in ['saliency', 'flatten'],
+                ignore_images=mode == 'no-images'
             )
             datasets.append(dataset)
 
