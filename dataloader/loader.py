@@ -64,19 +64,19 @@ def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images
     return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=False, drop_last=True)
 
 
-def loadOriginalData(batch_size, num_workers):
+def loadOriginalData(batch_size, num_workers, as_sequence=False, ignore_images=False):
     dataset_path = os.path.join(os.path.dirname(__file__), "../dataset/dataset/FixationNet_150_CrossUser/FixationNet_150_User1/")
     trainingX = torch.from_numpy(np.load(dataset_path + 'trainingX.npy')).float()
     trainingY = torch.from_numpy(np.load(dataset_path + 'trainingY.npy')).float()
 
-    dataset = FeatureDataset(trainingX, trainingY)
+    dataset = FeatureDataset(trainingX, trainingY, as_sequence, ignore_images)
     return DataLoader(dataset=dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
-def loadOriginalTestData(batch_size, num_workers):
+def loadOriginalTestData(batch_size, num_workers, as_sequence=False, ignore_images=False):
     dataset_path = os.path.join(os.path.dirname(__file__), "../dataset/dataset/FixationNet_150_CrossUser/FixationNet_150_User1/")
     testX = torch.from_numpy(np.load(dataset_path + 'testX.npy')).float()
     testY = torch.from_numpy(np.load(dataset_path + 'testY.npy')).float()
 
-    dataset = FeatureDataset(testX, testY)
+    dataset = FeatureDataset(testX, testY, as_sequence, ignore_images)
     return DataLoader(dataset=dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False, drop_last=True)
