@@ -3,7 +3,7 @@ from torch.nn import MSELoss, TransformerEncoderLayer, TransformerEncoder
 from torch.optim import AdamW
 import pytorch_lightning as pl
 
-from dataloader.loader import loadTrainingData, loadTestData
+from dataloader.loader import loadTrainingData, loadTestData, loadOriginalData, loadOriginalTestData
 from dataloader.utility import get_user_labels
 from .loss import AngularLoss
 from .positional_encoding import Time2VecPositionalEncoding
@@ -11,7 +11,7 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['no-images','saliency', 'flatten', 'patches'] = 'no-images'):
+    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images','saliency', 'flatten', 'patches'] = 'original'):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -30,8 +30,6 @@ class GazeTransformer(pl.LightningModule):
 
     def forward(self, src, images):
         src = src.transpose(-3, -2)
-        if not self.model_type in ['no-images', 'saliency', 'flatten', 'patches']:
-            src = self.backbone(src, images)
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
         return self.decoder(memory)
@@ -63,18 +61,24 @@ class GazeTransformer(pl.LightningModule):
         return t_opt
 
     def train_dataloader(self):
+        if self.model_type in ['original-no-images', 'original']:
+            return loadOriginalData(self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
         return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def val_dataloader(self):
+        if self.model_type in ['original-no-images', 'original']:
+            return loadOriginalTestData(self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
         return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def test_dataloader(self):
+        if self.model_type in ['original-no-images', 'original']:
+            return loadOriginalTestData(self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
         return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def set_feature_number(self):
-        if self.model_type == 'no-images':
+        if self.model_type in ['original-no-images','no-images']:
             self.feature_number = 16
-        elif self.model_type == 'saliency':
+        elif self.model_type in ['original', 'saliency']:
             self.feature_number = 592
         elif self.model_type == 'flatten':
             self.feature_number = 1040

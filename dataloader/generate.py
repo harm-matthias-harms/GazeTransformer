@@ -6,7 +6,7 @@ from utility import get_filenames, get_start_timestamps, get_video_timstamps, ge
 from video import VideoParser
 from datareader import DataReader
 
-GENERATE_PATH = '../dataset/dataset/FixationNet_150_Images/'
+GENERATE_PATH = '../dataset/dataset/FixationNet_150_Images/GazeLabel/'
 
 if __name__ == '__main__':
     filenames = get_filenames()
@@ -29,19 +29,19 @@ if __name__ == '__main__':
                 task_data = taskReader.get_data_for_timestamp(timestamp)
 
                 gaze_label = gazeReader.get_label(timestamp)
-                head_label = headReader.get_label(timestamp)
-                task_label = taskReader.get_label(timestamp)
+                # head_label = headReader.get_label(timestamp)
+                # task_label = taskReader.get_label(timestamp)
 
                 task_data = task_data.reshape((40, 5, 4))[:, :3, :].flatten()
-                task_label = task_label[:12]
+                #task_label = task_label[:12]
 
                 sample = {
-                    'label': np.concatenate((gaze_label, head_label, task_label)),
+                    'label': gaze_label, # np.concatenate((gaze_label, head_label, task_label)),
                     'sequence': np.concatenate((gaze_data, head_data, task_data)),
                     'video': i
                 }
 
-                if sample['label'].shape != (16,):
+                if sample['label'].shape != (2,):
                     raise "label not right shape"
                 if sample['sequence'].shape != (640, ):
                     raise "sequence not right shape"
