@@ -26,21 +26,21 @@ class FixationNetPL(pl.LightningModule):
         
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         pred = self(x)
         loss = self.angular_loss(pred, y)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         pred = self(x)
         val_loss = self.angular_loss(pred, y)
         self.log('val_loss', val_loss)
         return val_loss
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         pred = self(x)
         test_loss = self.angular_loss(pred, y)
         self.log('test_loss', test_loss)
@@ -53,14 +53,14 @@ class FixationNetPL(pl.LightningModule):
     def train_dataloader(self):
         if self.with_original_data:
             return loadOriginalData(self.batch_size, self.num_worker)
-        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, as_row=True)
+        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', as_row=True)
 
     def val_dataloader(self):
         if self.with_original_data:
             return loadOriginalTestData(self.batch_size, self.num_worker)
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, as_row=True)
+        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', as_row=True)
 
     def test_dataloader(self):
         if self.with_original_data:
             return loadOriginalTestData(self.batch_size, self.num_worker)
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, as_row=True)
+        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', as_row=True)

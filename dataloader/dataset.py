@@ -45,7 +45,7 @@ class TimeSequenceVideoDataset(Dataset):
         return torch.cat((gazes, head, task), 1)
 
 class VideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False):
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False, ignore_images=False):
         if in_memory:
             self.video = InMemoryVideoParser(
                 video_path, base_timestamp, start_timestamp, grayscale)
@@ -64,7 +64,7 @@ class VideoDataset(Dataset):
         sequence = self.feature_to_sequence(
             torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label'][:2]])
-        return sequence, label
+        return sequence, label, torch.Tensor()
 
     def feature_to_sequence(self, feature, images):
         images = images.flatten(1)
