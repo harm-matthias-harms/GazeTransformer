@@ -2,18 +2,22 @@ import dill
 import torch
 from torch.utils.data import Dataset
 
-from .video import VideoParser, InMemoryVideoParser
+from .video import VideoParser, InMemoryVideoParser, PTVideoParser
 
 
 class TimeSequenceVideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False, ignore_images=False):
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, in_memory=False, grayscale=False, ignore_images=False, is_pt=False):
         self.in_memory = in_memory
         self.ignore_images = ignore_images
 
         if not self.ignore_images:
             if in_memory:
-                self.video = InMemoryVideoParser(
-                    video_path, base_timestamp, start_timestamp, grayscale)
+                if is_pt:
+                    self.video = PTVideoParser(
+                        video_path, base_timestamp, start_timestamp)
+                else:
+                    self.video = InMemoryVideoParser(
+                        video_path, base_timestamp, start_timestamp, grayscale)
             else:
                 self.video = VideoParser(
                     video_path, base_timestamp, start_timestamp)
@@ -31,7 +35,7 @@ class TimeSequenceVideoDataset(Dataset):
             images = self.video.get_frames(data_point['video'])
         sequence = self.feature_to_sequence(torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label'][:2]])
-        return sequence, label, images
+        return sequence, label
 
     def feature_to_sequence(self, feature, images):
         gazes = torch.reshape(feature[:80], (40, 2))
@@ -88,7 +92,7 @@ class FeatureDataset(Dataset):
 
         if self.as_sequence:
             features = self.features_to_sequence(features)
-        return features, labels, torch.Tensor()
+        return features, labels
 
     def features_to_sequence(self, features):
         gazes = torch.reshape(features[:80], (40, 2))

@@ -8,8 +8,6 @@ from dataloader.utility import get_user_labels
 from .loss import AngularLoss
 from .positional_encoding import Time2VecPositionalEncoding
 from .head import Head
-from .resnet import ResNetBackbone
-from .dino import DinoBackbone
 
 
 class GazeTransformer(pl.LightningModule):
@@ -30,37 +28,30 @@ class GazeTransformer(pl.LightningModule):
         self.loss = MSELoss()
         self.angular_loss = AngularLoss()
 
-        if self.model_type == 'resnet':
-            self.backbone = ResNetBackbone()
-        elif self.model_type == 'dino':
-            self.backbone = DinoBackbone()
-
-    def forward(self, src, images):
+    def forward(self, src):
         src = src.transpose(-3, -2)
-        if self.model_type in ['resnet', 'dino']:
-            src = self.backbone(src, images)
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
         return self.decoder(memory)
         
 
     def training_step(self, batch, batch_idx):
-        src, y, images = batch
-        pred = self(src, images)
+        src, y = batch
+        pred = self(src)
         loss = self.angular_loss(pred, y)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        src, y, images = batch
-        pred = self(src, images)
+        src, y = batch
+        pred = self(src)
         val_loss = self.angular_loss(pred, y)
         self.log('val_loss', val_loss)
         return val_loss
 
     def test_step(self, batch, batch_idx):
-        src, y, images = batch
-        pred = self(src, images)
+        src, y = batch
+        pred = self(src)
         test_loss = self.angular_loss(pred, y)
         self.log('test_loss', test_loss)
         return test_loss

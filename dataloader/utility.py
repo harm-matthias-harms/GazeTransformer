@@ -18,6 +18,8 @@ SALIENCY_PATH = 'SaliencyVideos'
 CROPPED_PATH = 'CroppedVideos'
 FLATTEN_PATH = 'FlattenedVideos'
 PATCH_PATH = 'PatchVideos'
+RESNET_PATH = 'ResNetVideos'
+DINO_PATH = 'DinoVideos'
 
 
 def get_sequence_name(video_path):
@@ -70,7 +72,7 @@ def get_scene_labels(test_scene):
         os.path.dirname(__file__), DATASET_PATH, LABEL_PATH, 'SceneLabels.txt'), header=None)[0]
     return labels != test_scene
 
-def get_video_path(video_path, mode: Literal['saliency', 'flatten', 'patches', None]):
+def get_video_path(video_path, mode: Literal['saliency', 'flatten', 'patches', 'resnet', 'dino', None]):
     path = CROPPED_PATH
     if mode == 'salience':
         path = SALIENCY_PATH
@@ -78,8 +80,16 @@ def get_video_path(video_path, mode: Literal['saliency', 'flatten', 'patches', N
         path = FLATTEN_PATH
     elif mode == 'patches':
         path = PATCH_PATH
+    elif mode == 'resnet':
+        path = RESNET_PATH
+    elif mode == 'dino':
+        path = DINO_PATH
+
+    filename = video_path.split("bandicam ")[-1]
+    if mode in ["resnet", "dino"]:
+        filename = filename.replace('.avi', '.pt')
     
-    return os.path.join(os.path.dirname(__file__), DATASET_PATH, path, video_path.split("bandicam ")[-1])
+    return os.path.join(os.path.dirname(__file__), DATASET_PATH, path, filename)
 
 
 def get_saliency_path(video_path):

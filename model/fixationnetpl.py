@@ -26,21 +26,21 @@ class FixationNetPL(pl.LightningModule):
         
 
     def training_step(self, batch, batch_idx):
-        x, y, _ = batch
+        x, y = batch
         pred = self(x)
         loss = self.angular_loss(pred, y)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y, _ = batch
+        x, y = batch
         pred = self(x)
         val_loss = self.angular_loss(pred, y)
         self.log('val_loss', val_loss)
         return val_loss
 
     def test_step(self, batch, batch_idx):
-        x, y, _ = batch
+        x, y= batch
         pred = self(x)
         test_loss = self.angular_loss(pred, y)
         self.log('test_loss', test_loss)
