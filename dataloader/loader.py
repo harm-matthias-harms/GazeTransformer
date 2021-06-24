@@ -26,9 +26,10 @@ def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-im
                              sequence_prefix) + get_sequence_name(files[0]),
                 video_timestamps[idx],
                 start_timestamps[idx],
-                in_memory=mode in ['saliency', 'flatten', 'patches'],
+                in_memory=mode in ['saliency', 'flatten', 'patches', 'resnet', 'dino'],
                 grayscale=mode in ['saliency', 'flatten'],
-                ignore_images=mode == 'no-images'
+                ignore_images=mode == 'no-images',
+                is_pt=mode in ['resnet', 'dino']
             )
             datasets.append(dataset)
 
@@ -54,9 +55,10 @@ def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images
                              sequence_prefix) + get_sequence_name(files[0]),
                 video_timestamps[idx],
                 start_timestamps[idx],
-                in_memory=mode in ['saliency', 'flatten', 'patches'],
+                in_memory=mode in ['saliency', 'flatten', 'patches', 'resnet', 'dino'],
                 grayscale=mode in ['saliency', 'flatten'],
-                ignore_images=mode == 'no-images'
+                ignore_images=mode == 'no-images',
+                is_pt=mode in ['resnet', 'dino']
             )
             datasets.append(dataset)
 
