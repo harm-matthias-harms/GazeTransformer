@@ -8,10 +8,11 @@ from dataloader.utility import get_user_labels
 from .loss import AngularLoss
 from .positional_encoding import Time2VecPositionalEncoding
 from .head import Head
+from .resnet import ResNetBackbone
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images','saliency', 'flatten', 'patches'] = 'original'):
+    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images','saliency', 'flatten', 'patches', 'resnet'] = 'original'):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -28,8 +29,13 @@ class GazeTransformer(pl.LightningModule):
         self.loss = MSELoss()
         self.angular_loss = AngularLoss()
 
+        if self.model_type == 'resnet':
+            self.backbone = ResNetBackbone()
+
     def forward(self, src, images):
         src = src.transpose(-3, -2)
+        if self.model_type in ['resnet']:
+            src = self.backbone(src, images)
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
         return self.decoder(memory)
@@ -84,5 +90,7 @@ class GazeTransformer(pl.LightningModule):
             self.feature_number = 1040
         elif self.model_type == 'patches':
             self.feature_number = 784
+        elif self.model_type == 'resnet':
+            self.feature_number = 2064
             
         self.feature_number += self.pos_kernel_size
