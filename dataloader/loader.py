@@ -8,7 +8,7 @@ from .utility import get_filenames, get_start_timestamps, get_video_timstamps, g
 from .dataset import TimeSequenceVideoDataset, VideoDataset, FeatureDataset
 
 
-def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', as_row=False):
+def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', as_row=False):
     datasets = []
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
@@ -36,7 +36,7 @@ def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-im
     return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
-def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', as_row=False):
+def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', as_row=False):
     datasets = []
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
