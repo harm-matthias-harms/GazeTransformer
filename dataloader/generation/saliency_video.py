@@ -1,3 +1,4 @@
+import os
 import torch
 import cv2
 import numpy as np
@@ -7,18 +8,22 @@ import sys
 import torchvision.transforms.functional as TF
 
 sys.path.append("../model")
-
-from utility import get_filenames
 from saliency import SaliencyMap
+from utility import get_filenames
 
 
-GENERATE_PATH = '../dataset/dataset/SaliencyVideos/'
-batch_size = 128
+def generate(path_prefix=""):
+    print("Generate saliency videos")
 
-decord.bridge.set_bridge("torch")
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    GENERATE_PATH = os.path.join(path_prefix, '../dataset/dataset/SaliencyVideos/')
+    batch_size = 128
 
-if __name__ == '__main__':
+    if not os.path.exists(GENERATE_PATH):
+        os.makedirs(GENERATE_PATH)
+
+    decord.bridge.set_bridge("torch")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     filenames = get_filenames()
     model = SaliencyMap((256, 256)).to(device)
     for idx, files in enumerate(filenames):
@@ -44,3 +49,7 @@ if __name__ == '__main__':
                 out.write((image*255).astype(np.uint8))
 
         out.release()
+
+
+if __name__ == '__main__':
+    generate(path_prefix="../")
