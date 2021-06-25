@@ -1,4 +1,4 @@
-import torch
+import os
 import cv2
 import numpy as np
 import decord
@@ -9,14 +9,18 @@ from torchvision.transforms import Resize, Grayscale
 from utility import get_filenames
 
 
-INPUT_PATH = '../dataset/dataset/CroppedVideos/'
-OUTPUT_PATH = '../dataset/dataset/FlattenedVideos/'
-batch_size = 1024
+def generate(path_prefix=""):
+    print("Generate flattened videos")
 
-decord.bridge.set_bridge("torch")
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    INPUT_PATH = os.path.join(path_prefix, '../dataset/dataset/CroppedVideos/')
+    OUTPUT_PATH = os.path.join(path_prefix, '../dataset/dataset/FlattenedVideos/')
+    batch_size = 1024
 
-if __name__ == '__main__':
+    if not os.path.exists(OUTPUT_PATH):
+        os.makedirs(OUTPUT_PATH)
+
+    decord.bridge.set_bridge("torch")
+
     filenames = get_filenames()
 
     to_grayscale = Grayscale()
@@ -45,3 +49,7 @@ if __name__ == '__main__':
                 out.write(image.astype(np.uint8))
 
         out.release()
+
+
+if __name__ == '__main__':
+    generate(path_prefix="../")
