@@ -4,7 +4,7 @@ from torch.optim import AdamW
 import pytorch_lightning as pl
 
 from dataloader.loader import loadTrainingData, loadTestData, loadOriginalData, loadOriginalTestData
-from dataloader.utility import get_user_labels
+from dataloader.utility import get_user_labels, get_original_data_path
 from .loss import AngularLoss
 from .positional_encoding import Time2VecPositionalEncoding
 from .head import Head
@@ -33,7 +33,7 @@ class GazeTransformer(pl.LightningModule):
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
         return self.decoder(memory)
-        
+
 
     def training_step(self, batch, batch_idx):
         src, y = batch
@@ -67,12 +67,12 @@ class GazeTransformer(pl.LightningModule):
 
     def val_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
-            return loadOriginalTestData(self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
+            return loadOriginalTestData(get_original_data_path(1), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
         return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def test_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
-            return loadOriginalTestData(self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
+            return loadOriginalTestData(get_original_data_path(1), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
         return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def set_feature_number(self):
@@ -88,5 +88,5 @@ class GazeTransformer(pl.LightningModule):
             self.feature_number = 2064
         elif self.model_type == 'dino':
             self.feature_number = 400
-            
+
         self.feature_number += self.pos_kernel_size
