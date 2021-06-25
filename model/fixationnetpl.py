@@ -2,7 +2,7 @@ import os
 from torch.optim import Adam
 import pytorch_lightning as pl
 
-from dataloader.utility import get_user_labels
+from dataloader.utility import get_user_labels, get_original_data_path
 from dataloader.loader import loadOriginalData, loadOriginalTestData, loadTrainingData, loadTestData
 from .loss import AngularLoss
 from .fixationnet.model import FixationNet
@@ -23,7 +23,7 @@ class FixationNetPL(pl.LightningModule):
 
     def forward(self, x):
         return self.model(x)
-        
+
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -53,14 +53,14 @@ class FixationNetPL(pl.LightningModule):
     def train_dataloader(self):
         if self.with_original_data:
             return loadOriginalData(self.batch_size, self.num_worker)
-        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', as_row=True)
+        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', fixationnet=True)
 
     def val_dataloader(self):
         if self.with_original_data:
-            return loadOriginalTestData(self.batch_size, self.num_worker)
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', as_row=True)
+            return loadOriginalTestData(get_original_data_path(1), self.batch_size, self.num_worker)
+        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', fixationnet=True)
 
     def test_dataloader(self):
         if self.with_original_data:
-            return loadOriginalTestData(self.batch_size, self.num_worker)
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', as_row=True)
+            return loadOriginalTestData(get_original_data_path(1), self.batch_size, self.num_worker)
+        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', fixationnet=True)
