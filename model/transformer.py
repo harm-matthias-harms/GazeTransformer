@@ -62,7 +62,7 @@ class GazeTransformer(pl.LightningModule):
 
     def train_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
-            return loadOriginalData(self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
+            return loadOriginalData(get_original_data_path(1), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
         return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def val_dataloader(self):
