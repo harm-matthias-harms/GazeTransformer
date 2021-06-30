@@ -11,10 +11,11 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse']= 'angular'):
+    def __init__(self, pos_kernel_size=8, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse']= 'angular'):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
+        self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.num_worker = num_worker
         self.model_type = model_type
@@ -60,7 +61,7 @@ class GazeTransformer(pl.LightningModule):
         return test_loss
 
     def configure_optimizers(self):
-        t_opt = AdamW(self.parameters())
+        t_opt = AdamW(self.parameters(), lr=self.learning_rate)
         return t_opt
 
     def train_dataloader(self):

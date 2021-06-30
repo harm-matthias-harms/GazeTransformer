@@ -20,13 +20,14 @@ def main(args):
         save_top_k=1,
     )
 
-    model = GazeTransformer(model_type=args.model,
+    model = GazeTransformer(model_type=args.model, loss=args.loss, learning_rate=args.learningRate,
                             batch_size=args.batchSize, num_worker=args.worker)
-    trainer = pl.Trainer(gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback])
+    trainer = pl.Trainer(
+        gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback])
 
     trainer.fit(model)
 
-    best_model=model.load_from_checkpoint(
+    best_model = model.load_from_checkpoint(
         model_checkpoint_callback.best_model_path)
 
     trainer.test(best_model)
@@ -38,13 +39,16 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser=argparse.ArgumentParser(description = "GazeTransformer")
-    parser.add_argument('-m', '--model', default = 'original', type = str,
-                        help = "the model of the network: original | original-no-images | no-images | saliency | flatten | patches | resnet | dino (default: original)")
-    parser.add_argument('-l', '--loss', default='angular', type=str, help="the loss function: angular | mse (default: angular)")
-    parser.add_argument('-b', '--batchSize', default = 256,
-                        type = int, help = "the batch size (default: 256)")
-    parser.add_argument('-w', '--worker', default = 12, type = int,
-                        help = "the number of workers (default: 12)")
+    parser = argparse.ArgumentParser(description="GazeTransformer")
+    parser.add_argument('-m', '--model', default='original', type=str,
+                        help="the model of the network: original | original-no-images | no-images | saliency | flatten | patches | resnet | dino (default: original)")
+    parser.add_argument('-l', '--loss', default='angular', type=str,
+                        help="the loss function: angular | mse (default: angular)")
+    parser.add_argument('-lr', '--learningRate', default=0.001,
+                        type=float, help="the learning rate (default: 0.001)")
+    parser.add_argument('-b', '--batchSize', default=256,
+                        type=int, help="the batch size (default: 256)")
+    parser.add_argument('-w', '--worker', default=12, type=int,
+                        help="the number of workers (default: 12)")
 
     main(parser.parse_args())
