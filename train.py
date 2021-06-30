@@ -23,7 +23,7 @@ def main(args):
     model = GazeTransformer(model_type=args.model, loss=args.loss, learning_rate=args.learningRate,
                             batch_size=args.batchSize, num_worker=args.worker)
     trainer = pl.Trainer(
-        gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback])
+        gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback], limit_train_batches=args.limitTrainBatches)
 
     trainer.fit(model)
 
@@ -50,5 +50,7 @@ if __name__ == '__main__':
                         type=int, help="the batch size (default: 256)")
     parser.add_argument('-w', '--worker', default=12, type=int,
                         help="the number of workers (default: 12)")
+    parser.add_argument('--limitTrainBatches', default=1.0, type=float,
+                        help="limit the number of train batches in an epoch (default: 1.0)")
 
     main(parser.parse_args())
