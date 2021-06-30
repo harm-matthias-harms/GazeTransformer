@@ -37,7 +37,7 @@ class TimeSequenceVideoDataset(Dataset):
         gazes = torch.reshape(feature[:80], (40, 2))
         head = torch.reshape(feature[80:160], (40, 2))
         task = torch.reshape(feature[160: 640], (40, 12))
-        if not self.ignore_images and self.in_memory:
+        if not self.ignore_images:
             images = images.flatten(1)
             # time descending, last image -> first image
             images = torch.cat(
