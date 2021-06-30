@@ -11,7 +11,7 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images','saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original'):
+    def __init__(self, pos_kernel_size=8, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse']= 'angular'):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -20,13 +20,17 @@ class GazeTransformer(pl.LightningModule):
         self.model_type = model_type
         self.set_feature_number()
 
-        self.positional_encoding = Time2VecPositionalEncoding(self.feature_number - self.pos_kernel_size, self.pos_kernel_size)
+        self.positional_encoding = Time2VecPositionalEncoding(
+            self.feature_number - self.pos_kernel_size, self.pos_kernel_size)
         encoder_layers = TransformerEncoderLayer(
             self.feature_number, nhead=8, dim_feedforward=self.feature_number)
         self.encoder = TransformerEncoder(encoder_layers, num_layers=6)
         self.decoder = Head(self.feature_number)
-        self.loss = MSELoss()
         self.angular_loss = AngularLoss()
+        if loss == 'angular':
+            self.loss = self.angular_loss
+        elif loss == 'mse':
+            self.loss = MSELoss()
 
     def forward(self, src):
         src = src.transpose(-3, -2)
@@ -34,18 +38,17 @@ class GazeTransformer(pl.LightningModule):
         memory = self.encoder(src).transpose(-2, -3)
         return self.decoder(memory)
 
-
     def training_step(self, batch, batch_idx):
         src, y = batch
         pred = self(src)
-        loss = self.angular_loss(pred, y)
+        loss = self.loss(pred, y)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         src, y = batch
         pred = self(src)
-        val_loss = self.angular_loss(pred, y)
+        val_loss = self.loss(pred, y)
         self.log('val_loss', val_loss)
         return val_loss
 
@@ -76,7 +79,7 @@ class GazeTransformer(pl.LightningModule):
         return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
 
     def set_feature_number(self):
-        if self.model_type in ['original-no-images','no-images']:
+        if self.model_type in ['original-no-images', 'no-images']:
             self.feature_number = 16
         elif self.model_type in ['original', 'saliency']:
             self.feature_number = 592

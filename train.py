@@ -41,6 +41,7 @@ if __name__ == '__main__':
     parser=argparse.ArgumentParser(description = "GazeTransformer")
     parser.add_argument('-m', '--model', default = 'original', type = str,
                         help = "the model of the network: original | original-no-images | no-images | saliency | flatten | patches | resnet | dino (default: original)")
+    parser.add_argument('-l', '--loss', default='angular', type=str, help="the loss function: angular | mse (default: angular)")
     parser.add_argument('-b', '--batchSize', default = 256,
                         type = int, help = "the batch size (default: 256)")
     parser.add_argument('-w', '--worker', default = 12, type = int,
