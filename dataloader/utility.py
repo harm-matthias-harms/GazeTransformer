@@ -85,7 +85,7 @@ def get_scene_labels(test_scene):
 
 def get_video_path(video_path, mode: Literal['saliency', 'flatten', 'patches', 'resnet', 'dino', None]):
     path = CROPPED_PATH
-    if mode == 'salience':
+    if mode == 'saliency':
         path = SALIENCY_PATH
     elif mode == 'flatten':
         path = FLATTEN_PATH
