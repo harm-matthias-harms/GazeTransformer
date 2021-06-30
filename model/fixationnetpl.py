@@ -52,7 +52,7 @@ class FixationNetPL(pl.LightningModule):
 
     def train_dataloader(self):
         if self.with_original_data:
-            return loadOriginalData(self.batch_size, self.num_worker)
+            return loadOriginalData(get_original_data_path(1), self.batch_size, self.num_worker)
         return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, mode='saliency', fixationnet=True)
 
     def val_dataloader(self):
