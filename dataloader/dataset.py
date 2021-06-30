@@ -47,7 +47,7 @@ class TimeSequenceVideoDataset(Dataset):
 
 
 class FixationnetVideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, grayscale=False):
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, grayscale=False, ignore_images=False, is_pt=False):
         self.video = InMemoryVideoParser(
             video_path, base_timestamp, start_timestamp, grayscale)
         with open(sequence_path, 'rb') as f:
