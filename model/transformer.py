@@ -4,14 +4,14 @@ from torch.optim import AdamW
 import pytorch_lightning as pl
 
 from dataloader.loader import loadTrainingData, loadTestData, loadOriginalData, loadOriginalTestData
-from dataloader.utility import get_user_labels, get_original_data_path
+from dataloader.utility import get_user_labels, get_scene_labels, get_original_data_path
 from .loss import AngularLoss
 from .positional_encoding import Time2VecPositionalEncoding
 from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, nhead=8, num_layers=6, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse']= 'angular'):
+    def __init__(self, pos_kernel_size=8, nhead=8, num_layers=6, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -19,13 +19,16 @@ class GazeTransformer(pl.LightningModule):
         self.batch_size = batch_size
         self.num_worker = num_worker
         self.model_type = model_type
+        self.cross_eval_type = cross_eval_type
+        self.cross_eval_exclude = cross_eval_exclude
         self.set_feature_number()
 
         self.positional_encoding = Time2VecPositionalEncoding(
             self.feature_number - self.pos_kernel_size, self.pos_kernel_size)
         encoder_layers = TransformerEncoderLayer(
             self.feature_number, nhead=nhead, dim_feedforward=self.feature_number)
-        self.encoder = TransformerEncoder(encoder_layers, num_layers=num_layers)
+        self.encoder = TransformerEncoder(
+            encoder_layers, num_layers=num_layers)
         self.decoder = Head(self.feature_number)
         self.angular_loss = AngularLoss()
         if loss == 'angular':
@@ -66,18 +69,23 @@ class GazeTransformer(pl.LightningModule):
 
     def train_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
-            return loadOriginalData(get_original_data_path(1), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
-        return loadTrainingData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
+            return loadOriginalData(get_original_data_path(self.cross_eval_exclude, is_user=self.cross_eval_type == 'user'), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
+        return loadTrainingData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type)
 
     def val_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
-            return loadOriginalTestData(get_original_data_path(1), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
+            return loadOriginalTestData(get_original_data_path(self.cross_eval_exclude, is_user=self.cross_eval_type == 'user'), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
+        return loadTestData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type)
 
     def test_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
-            return loadOriginalTestData(get_original_data_path(1), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
-        return loadTestData(get_user_labels(1), self.batch_size, self.num_worker, self.model_type)
+            return loadOriginalTestData(get_original_data_path(self.cross_eval_exclude, is_user=self.cross_eval_type == 'user'), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
+        return loadTestData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type)
+
+    def cross_eval_labels(self):
+        if self.cross_eval_type == 'user':
+            return get_user_labels(self.cross_eval_exclude)
+        return get_scene_labels(self.cross_eval_exclude)
 
     def set_feature_number(self):
         if self.model_type in ['original-no-images', 'no-images']:

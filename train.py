@@ -50,6 +50,10 @@ if __name__ == '__main__':
                         help="the model of the network: original | original-no-images | no-images | saliency | flatten | patches | resnet | dino (default: original)")
     parser.add_argument('-l', '--loss', default='angular', type=str,
                         help="the loss function: angular | mse (default: angular)")
+    parser.add_argument('--crossEvalType', default='user', type=str,
+                        help="type for the cross evaluation: user | scene (default: user)")
+    parser.add_argument('--crossEvalExclude', default=1, type=int,
+                        help="the set to exclude: user: 1 | 2 | 3, scene: 1 | 2 | 3 | 4 (default: 1)")
     parser.add_argument('-nh', '--nheads', default=8, type=int,
                         help="nhead of the transformer (default: 8)")
     parser.add_argument('-nl', '--numLayers', default=6, type=int,
