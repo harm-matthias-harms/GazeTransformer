@@ -20,7 +20,7 @@ def main(args):
         save_top_k=1,
     )
 
-    model = GazeTransformer(model_type=args.model, loss=args.loss, learning_rate=args.learningRate,
+    model = GazeTransformer(model_type=args.model, loss=args.loss, nhead=args.nhead, num_layers=args.numLayers, learning_rate=args.learningRate,
                             batch_size=args.batchSize, num_worker=args.worker)
     trainer = pl.Trainer(
         gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback], limit_train_batches=args.limitTrainBatches)
@@ -44,6 +44,8 @@ if __name__ == '__main__':
                         help="the model of the network: original | original-no-images | no-images | saliency | flatten | patches | resnet | dino (default: original)")
     parser.add_argument('-l', '--loss', default='angular', type=str,
                         help="the loss function: angular | mse (default: angular)")
+    parser.add_argument('-nh', '--nheads', default=8, type=int, help="nhead of the transformer (default: 8)")
+    parser.add_argument('-nl', '--numLayers', default=6, type=int, help="num_layers of the transformer (default: 6)")
     parser.add_argument('-lr', '--learningRate', default=0.001,
                         type=float, help="the learning rate (default: 0.001)")
     parser.add_argument('-b', '--batchSize', default=256,
