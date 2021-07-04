@@ -11,7 +11,7 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, nhead=8, num_layers=6, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
+    def __init__(self, pos_kernel_size=8, predict_delta=False, nhead=8, num_layers=6, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -22,6 +22,7 @@ class GazeTransformer(pl.LightningModule):
         self.cross_eval_type = cross_eval_type
         self.cross_eval_exclude = cross_eval_exclude
         self.set_feature_number()
+        self.predict_delta = predict_delta
 
         self.positional_encoding = Time2VecPositionalEncoding(
             self.feature_number - self.pos_kernel_size, self.pos_kernel_size)
@@ -37,10 +38,14 @@ class GazeTransformer(pl.LightningModule):
             self.loss = MSELoss()
 
     def forward(self, src):
+        currentGaze = src[:, -1, :2]
         src = src.transpose(-3, -2)
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
-        return self.decoder(memory)
+        out = self.decoder(memory)
+        if self.predict_delta:
+            out = currentGaze + out
+        return out
 
     def training_step(self, batch, batch_idx):
         src, y = batch
