@@ -16,7 +16,7 @@ def main(args):
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=checkpoint_path,
-        filename='{epoch}-{val_loss:.2f}',
+        filename='{epoch}-{val_loss:.2f}' + f'-{args.nheads}-{args.numLayers}',
         monitor='val_loss',
         mode='min',
         verbose=True,
@@ -26,7 +26,7 @@ def main(args):
     if args.resume:
         resume_from_checkpoint = os.path.join(checkpoint_path, args.resume)
 
-    model = GazeTransformer(model_type=args.model, loss=args.loss, nhead=args.nheads, num_layers=args.numLayers, learning_rate=args.learningRate,
+    model = GazeTransformer(model_type=args.model, loss=args.loss, predict_delta=args.delta, nhead=args.nheads, num_layers=args.numLayers, learning_rate=args.learningRate,
                             batch_size=args.batchSize, num_worker=args.worker)
     trainer = pl.Trainer(
         gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback],
@@ -58,6 +58,8 @@ if __name__ == '__main__':
                         help="nhead of the transformer (default: 8)")
     parser.add_argument('-nl', '--numLayers', default=6, type=int,
                         help="num_layers of the transformer (default: 6)")
+    parser.add_argument('--delta', default=False, type=lambda x: (str(x).lower() == 'true'),
+                        help="predict the delta and add to last know gaze position (default: True)")
     parser.add_argument('-lr', '--learningRate', default=0.001,
                         type=float, help="the learning rate (default: 0.001)")
     parser.add_argument('-b', '--batchSize', default=256,

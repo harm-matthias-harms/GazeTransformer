@@ -9,7 +9,7 @@ from .fixationnet.model import FixationNet
 
 
 class FixationNetPL(pl.LightningModule):
-    def __init__(self, batch_size=2, num_worker=0, with_original_data=False):
+    def __init__(self, batch_size=2, num_worker=0, with_original_data=False, predict_delta=True):
         super().__init__()
         self.save_hyperparameters()
         self.batch_size = batch_size
@@ -18,7 +18,7 @@ class FixationNetPL(pl.LightningModule):
 
         cluster_path = os.path.join(os.path.dirname(__file__), "../dataset/dataset/FixationNet_150_CrossUser/FixationNet_150_User1/clusterCenters.npy")
 
-        self.model = FixationNet(80, 80, 480, 1152, cluster_path)
+        self.model = FixationNet(80, 80, 480, 1152, cluster_path, predict_delta=predict_delta)
         self.angular_loss = AngularLoss()
 
     def forward(self, x):

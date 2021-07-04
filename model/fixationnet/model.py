@@ -10,13 +10,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class FixationNet(nn.Module):
-    def __init__(self, gazeSeqSize, headSeqSize, objectSeqSize, saliencySize, clusterPath):
+    def __init__(self, gazeSeqSize, headSeqSize, objectSeqSize, saliencySize, clusterPath, predict_delta= True):
         super().__init__()
         # the input params
         self.gazeSeqSize = gazeSeqSize
         self.headSeqSize = headSeqSize
         self.objectSeqSize = objectSeqSize
         self.saliencySize = saliencySize
+        self.predict_delta = predict_delta
 
         print('gazeSeqSize: {}'.format(self.gazeSeqSize))
         print('headSeqSize: {}'.format(self.headSeqSize))
@@ -214,7 +215,8 @@ class FixationNet(nn.Module):
         prdInput = torch.cat((seqOut, saliencyOut), 1)
         prdOut = self.PrdFC(prdInput)
         out = prdOut.mm(self.cluster)
-        out = out + currentGaze
+        if self.predict_delta:
+            out = out + currentGaze
         return out
 
     def forward(self, x):

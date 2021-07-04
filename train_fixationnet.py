@@ -22,7 +22,7 @@ def main(args):
     )
 
     model = FixationNetPL(batch_size=args.batchSize,
-                          num_worker=args.worker, with_original_data=args.originalData)
+                          num_worker=args.worker, with_original_data=args.originalData, predict_delta=args.delta)
     trainer = pl.Trainer(
         gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback])
 
@@ -47,5 +47,7 @@ if __name__ == '__main__':
                         type=int, help="the batch size (default: 512)")
     parser.add_argument('-w', '--worker', default=12, type=int,
                         help="the number of workers (default: 12)")
+    parser.add_argument('--delta', default=True, type=lambda x: (str(x).lower() == 'true'),
+                        help="predict the delta and add to last know gaze position (default: True)")
 
     main(parser.parse_args())
