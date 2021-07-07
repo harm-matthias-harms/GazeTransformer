@@ -31,7 +31,8 @@ def main(args):
     model = GazeTransformer(model_type=args.model, loss=args.loss, predict_delta=args.delta, nhead=args.nheads, num_layers=args.numLayers,
                             image_to_features=args.imageToFeature, backbone_features=args.backboneFeatures,
                             inner_head_features=args.innerHeadFeatures, learning_rate=args.learningRate,
-                            batch_size=args.batchSize, num_worker=args.worker)
+                            batch_size=args.batchSize, num_worker=args.worker,
+                            cross_eval_type=args.crossEvalType, cross_eval_exclude=args.crossEvalExclude)
     trainer = pl.Trainer(
         gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback],
         limit_train_batches=args.limitTrainBatches, resume_from_checkpoint=resume_from_checkpoint)
