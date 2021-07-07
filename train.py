@@ -12,7 +12,7 @@ def main(args):
         verbose=True
     )
 
-    checkpoint_path = f'./model/checkpoints/GazeTransformer/{args.model}/'
+    checkpoint_path = f'./model/checkpoints/GazeTransformer/{args.model}/' + args.folder
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=checkpoint_path,
@@ -72,6 +72,8 @@ if __name__ == '__main__':
                         help="the number of workers (default: 12)")
     parser.add_argument('--limitTrainBatches', default=1.0, type=float,
                         help="limit the number of train batches in an epoch (default: 1.0)")
+    parser.add_argument('-f', '--folder', default='', type=str,
+                        help="specifies a subfolder for the checkpoint (default: '')")
     parser.add_argument('-r', '--resume', default=None, type=str,
                         help="file name of checkpoint to resume training (default: None)")
 
