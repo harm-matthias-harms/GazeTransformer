@@ -11,7 +11,7 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, predict_delta=False, nhead=8, num_layers=6, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
+    def __init__(self, pos_kernel_size=8, predict_delta=False, nhead=8, num_layers=6, inner_head_features= 128, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -30,7 +30,7 @@ class GazeTransformer(pl.LightningModule):
             self.feature_number, nhead=nhead, dim_feedforward=self.feature_number)
         self.encoder = TransformerEncoder(
             encoder_layers, num_layers=num_layers)
-        self.decoder = Head(self.feature_number)
+        self.decoder = Head(self.feature_number, inner_head_features)
         self.angular_loss = AngularLoss()
         if loss == 'angular':
             self.loss = self.angular_loss

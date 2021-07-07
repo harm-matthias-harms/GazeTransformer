@@ -14,7 +14,7 @@ def main(args):
     checkpoint_folder = 'Original' if args.originalData else 'Generated'
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=f'./model/checkpoints/FixationNet/{checkpoint_folder}/',
-        filename='{epoch}-{val_loss:.2f}',
+        filename='{epoch}-{val_loss:.2f}' + f'-delta={args.delta}',
         monitor='val_loss',
         mode='min',
         verbose=True,
