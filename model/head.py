@@ -7,6 +7,7 @@ class Head(nn.Module):
         self.layers = nn.Sequential(
             nn.Linear(feature_number, inner_head_features),
             nn.ReLU(),
+            nn.Dropout(0.1),
             nn.Linear(inner_head_features, 2),
             nn.ReLU(),
             nn.Flatten(),

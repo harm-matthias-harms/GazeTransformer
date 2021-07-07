@@ -28,6 +28,7 @@ def main(args):
         resume_from_checkpoint = os.path.join(checkpoint_path, args.resume)
 
     model = GazeTransformer(model_type=args.model, loss=args.loss, predict_delta=args.delta, nhead=args.nheads, num_layers=args.numLayers,
+                            image_to_features=args.imageToFeature, backbone_features=args.backboneFeatures,
                             inner_head_features=args.innerHeadFeatures, learning_rate=args.learningRate,
                             batch_size=args.batchSize, num_worker=args.worker)
     trainer = pl.Trainer(
@@ -62,8 +63,12 @@ if __name__ == '__main__':
                         help="num_layers of the transformer (default: 6)")
     parser.add_argument('-ih', '--innerHeadFeatures', default=128,
                         type=int, help="number of inner features in the head (default: 8)")
+    parser.add_argument('--backboneFeatures', default=128, type=int,
+                        help="compress preprocessed image to this number of features (requires --imageToFeature True, default: 128)")
     parser.add_argument('--delta', default=False, type=lambda x: (str(x).lower() == 'true'),
                         help="predict the delta and add to last know gaze position (default: True)")
+    parser.add_argument('--imageToFeature', default=False, type=lambda x: (str(x).lower() == 'true'),
+                        help="compress the preprocessed image to a set of features (default: False)")
     parser.add_argument('-lr', '--learningRate', default=0.001,
                         type=float, help="the learning rate (default: 0.001)")
     parser.add_argument('-b', '--batchSize', default=256,
