@@ -12,7 +12,8 @@ def main(args):
         verbose=True
     )
 
-    checkpoint_path = f'./model/checkpoints/GazeTransformer/{args.model}/' + args.folder
+    checkpoint_path = os.path.join(os.path.dirname(__file__),
+                                   'model/checkpoints/GazeTransformer', args.model, args.folder)
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=checkpoint_path,
