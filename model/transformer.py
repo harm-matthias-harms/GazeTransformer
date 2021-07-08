@@ -1,5 +1,6 @@
 from typing_extensions import Literal
-from torch.nn import MSELoss, TransformerEncoderLayer, TransformerEncoder
+import torch
+import torch.nn as nn
 from torch.optim import AdamW
 import pytorch_lightning as pl
 
@@ -11,7 +12,7 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, pos_kernel_size=8, predict_delta=False, nhead=8, num_layers=6, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
+    def __init__(self, predict_delta=False, image_to_features=True, pos_kernel_size=8, nhead=8, num_layers=6, backbone_features=128, inner_head_features=128, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -21,24 +22,30 @@ class GazeTransformer(pl.LightningModule):
         self.model_type = model_type
         self.cross_eval_type = cross_eval_type
         self.cross_eval_exclude = cross_eval_exclude
-        self.set_feature_number()
+        self.backbone_features = backbone_features
+        self.image_to_features = image_to_features
+        self.set_feature_and_backbone_number()
         self.predict_delta = predict_delta
 
+        self.backbone = nn.Sequential(
+            nn.Linear(self.backbone_number, self.backbone_features), nn.ReLU(), nn.Dropout(0.1))
         self.positional_encoding = Time2VecPositionalEncoding(
             self.feature_number - self.pos_kernel_size, self.pos_kernel_size)
-        encoder_layers = TransformerEncoderLayer(
+        encoder_layers = nn.TransformerEncoderLayer(
             self.feature_number, nhead=nhead, dim_feedforward=self.feature_number)
-        self.encoder = TransformerEncoder(
+        self.encoder = nn.TransformerEncoder(
             encoder_layers, num_layers=num_layers)
-        self.decoder = Head(self.feature_number)
+        self.decoder = Head(self.feature_number, inner_head_features)
         self.angular_loss = AngularLoss()
         if loss == 'angular':
             self.loss = self.angular_loss
         elif loss == 'mse':
-            self.loss = MSELoss()
+            self.loss = nn.MSELoss()
 
     def forward(self, src):
         currentGaze = src[:, -1, :2]
+        if self.image_to_features:
+            src = torch.cat((src[:, :, :16], self.backbone(src[:, :, 16:])), 2)
         src = src.transpose(-3, -2)
         src = self.positional_encoding(src)
         memory = self.encoder(src).transpose(-2, -3)
@@ -92,7 +99,9 @@ class GazeTransformer(pl.LightningModule):
             return get_user_labels(self.cross_eval_exclude)
         return get_scene_labels(self.cross_eval_exclude)
 
-    def set_feature_number(self):
+    def set_feature_and_backbone_number(self):
+        self.backbone_number = 1
+
         if self.model_type in ['original-no-images', 'no-images']:
             self.feature_number = 16
         elif self.model_type in ['original', 'saliency']:
@@ -105,5 +114,9 @@ class GazeTransformer(pl.LightningModule):
             self.feature_number = 2064
         elif self.model_type == 'dino':
             self.feature_number = 400
+
+        if self.image_to_features:
+            self.backbone_number = self.feature_number - 16
+            self.feature_number = 16 + self.backbone_features
 
         self.feature_number += self.pos_kernel_size
