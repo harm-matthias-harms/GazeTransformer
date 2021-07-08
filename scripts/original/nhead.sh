@@ -1,0 +1,17 @@
+for i in {1..3}; do
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/1-1'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/1-2'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/1-3'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/2-1'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/2-2'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/2-4'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/4-1'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/4-4'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/4-6'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/6-1'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/6-4'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/6-6'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/8-1'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/8-4'
+  python ${0%/*}/../../train.py -m original -nh 1 -nl 1 --delta True -f 'nhead/8-6'
+done
