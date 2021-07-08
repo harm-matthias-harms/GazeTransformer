@@ -20,6 +20,7 @@ class FixationNetPL(pl.LightningModule):
         self.cross_eval_exclude = cross_eval_exclude
 
         cluster_path = os.path.join(os.path.dirname(__file__),
+                                    "../dataset/dataset",
                                     get_original_data_path(self.cross_eval_exclude,
                                                            is_user=self.cross_eval_type == 'user'),
                                     "clusterCenters.npy")
