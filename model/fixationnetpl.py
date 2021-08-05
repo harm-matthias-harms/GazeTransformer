@@ -18,6 +18,7 @@ class FixationNetPL(pl.LightningModule):
         self.with_original_data = with_original_data
         self.cross_eval_type = cross_eval_type
         self.cross_eval_exclude = cross_eval_exclude
+        self.model_type = 'saliency'
 
         cluster_path = os.path.join(os.path.dirname(__file__),
                                     "../dataset/dataset",

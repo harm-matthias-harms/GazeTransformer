@@ -33,6 +33,9 @@ class TimeSequenceVideoDataset(Dataset):
         label = torch.FloatTensor([data_point['label']])
         return sequence, label
 
+    def get_video_idx(self, idx):
+        return self.data[idx]['video']
+
     def feature_to_sequence(self, feature, images):
         gazes = torch.reshape(feature[:80], (40, 2))
         head = torch.reshape(feature[80:160], (40, 2))
@@ -42,8 +45,10 @@ class TimeSequenceVideoDataset(Dataset):
             # time descending, last image -> first image
             images = torch.cat(
                 (images[-1].repeat(20, 1), images[0].repeat(20, 1)))
-            return torch.cat((gazes, head, task, images), 1).flip([0]) # flip to create an ascending time series
-        return torch.cat((gazes, head, task), 1).flip([0]) # flip to create an ascending time series
+            # flip to create an ascending time series
+            return torch.cat((gazes, head, task, images), 1).flip([0])
+        # flip to create an ascending time series
+        return torch.cat((gazes, head, task), 1).flip([0])
 
 
 class FixationnetVideoDataset(Dataset):
@@ -63,6 +68,9 @@ class FixationnetVideoDataset(Dataset):
             torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label']])
         return sequence, label
+
+    def get_video_idx(self, idx):
+        return self.data[idx]['video']
 
     def feature_to_sequence(self, feature, images):
         images = images.flatten(1)
@@ -98,5 +106,7 @@ class FixationnetDataset(Dataset):
             image_1 = features[1216:]
             # time descending, last image -> first image
             images = torch.cat((image_0.repeat(20, 1), image_1.repeat(20, 1)))
-            return torch.cat((gazes, head, task, images), 1).flip([0]) # flip to create an ascending time series
-        return torch.cat((gazes, head, task), 1).flip([0]) # flip to create an ascending time series
+            # flip to create an ascending time series
+            return torch.cat((gazes, head, task, images), 1).flip([0])
+        # flip to create an ascending time series
+        return torch.cat((gazes, head, task), 1).flip([0])
