@@ -1,4 +1,4 @@
-for i in {1..3}; do
+for i in {1..2}; do
   python ${0%/*}/../../train.py -m flatten --limitTrainBatches 0.25 -nh 1 -nl 1 -f 'nhead/1-1'
   python ${0%/*}/../../train.py -m flatten --limitTrainBatches 0.25 -nh 1 -nl 2 -f 'nhead/1-2'
   python ${0%/*}/../../train.py -m flatten --limitTrainBatches 0.25 -nh 1 -nl 4 -f 'nhead/1-4'
