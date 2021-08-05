@@ -22,6 +22,9 @@ class TimeSequenceVideoDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    def get_video_idx(self, idx):
+        return self.data[idx]['video']
+
     def __getitem__(self, idx):
         data_point = self.data[idx]
         if self.ignore_images:
@@ -42,8 +45,10 @@ class TimeSequenceVideoDataset(Dataset):
             # time descending, last image -> first image
             images = torch.cat(
                 (images[-1].repeat(20, 1), images[0].repeat(20, 1)))
-            return torch.cat((gazes, head, task, images), 1).flip([0]) # flip to create an ascending time series
-        return torch.cat((gazes, head, task), 1).flip([0]) # flip to create an ascending time series
+            # flip to create an ascending time series
+            return torch.cat((gazes, head, task, images), 1).flip([0])
+        # flip to create an ascending time series
+        return torch.cat((gazes, head, task), 1).flip([0])
 
 
 class FixationnetVideoDataset(Dataset):
@@ -98,5 +103,7 @@ class FixationnetDataset(Dataset):
             image_1 = features[1216:]
             # time descending, last image -> first image
             images = torch.cat((image_0.repeat(20, 1), image_1.repeat(20, 1)))
-            return torch.cat((gazes, head, task, images), 1).flip([0]) # flip to create an ascending time series
-        return torch.cat((gazes, head, task), 1).flip([0]) # flip to create an ascending time series
+            # flip to create an ascending time series
+            return torch.cat((gazes, head, task, images), 1).flip([0])
+        # flip to create an ascending time series
+        return torch.cat((gazes, head, task), 1).flip([0])

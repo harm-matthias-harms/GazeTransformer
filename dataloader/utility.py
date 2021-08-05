@@ -72,6 +72,7 @@ def get_scene_labels(test_scene):
         os.path.dirname(__file__), DATASET_PATH, LABEL_PATH, 'SceneLabels.txt'), header=None)[0]
     return labels != test_scene
 
+
 def get_original_data_path(number, is_user=True):
     cross_eval_type = "User" if is_user else "Scene"
     return f"FixationNet_150_Cross{cross_eval_type}/FixationNet_150_{cross_eval_type}{number}/"
