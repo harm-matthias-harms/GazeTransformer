@@ -1,4 +1,5 @@
 # Generates a video output for given parameters
+# python eval_video.py -v ./dataset/rawData/Videos/bandicam\ 2020-08-24\ 21-34-24-935.avi -vi 0 -o ./examples/saliency/2020-08-24\ 21-34-24-935.avi -c ./model/checkpoints/GazeTransformer/saliency/nhead/2-1/epoch=4-val_loss=3.37-2-1-delta=False.ckpt
 import argparse
 import os
 import math
