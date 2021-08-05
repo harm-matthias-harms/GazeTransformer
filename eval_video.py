@@ -4,8 +4,9 @@ import os
 import math
 import torch
 from dataloader.utility import get_sequence_name, get_video_path, get_video_timstamps, get_start_timestamps
-from dataloader.dataset import TimeSequenceVideoDataset
+from dataloader.dataset import TimeSequenceVideoDataset, FixationnetVideoDataset
 from model.transformer import GazeTransformer
+from model.fixationnetpl import FixationNetPL
 import decord
 import cv2
 import numpy as np
@@ -17,19 +18,21 @@ RED = (255, 0, 0)
 
 
 def main(args):
-    model = GazeTransformer.load_from_checkpoint(args.checkpoint).to('cuda')
+    model_type = FixationNetPL if "FixationNet" in args.checkpoint else GazeTransformer
+    dataset_type = FixationnetVideoDataset if model_type == FixationNetPL else TimeSequenceVideoDataset
+
+    model = model_type.load_from_checkpoint(args.checkpoint).to('cuda').eval()
     vr = decord.VideoReader(args.video)
     out = cv2.VideoWriter(
         args.output, cv2.VideoWriter_fourcc(*'XVID'), 60, (540, 600))
-    dataset = TimeSequenceVideoDataset(get_video_path(args.video, model.model_type),
-                                       os.path.join(os.path.dirname(
-                                           __file__), 'dataset/dataset/FixationNet_150_Images/GazeLabel/', get_sequence_name(args.video)),
-                                       get_video_timstamps()[args.videoIndex],
-                                       get_start_timestamps()[args.videoIndex],
-                                       ignore_images=model.model_type == 'no-images',
-                                       is_pt=model.model_type in [
-                                           'resnet', 'dino'],
-                                       grayscale=model.model_type in ['saliency', 'flatten'])
+    dataset = dataset_type(get_video_path(args.video, model.model_type),
+                           os.path.join(os.path.dirname(
+                               __file__), 'dataset/dataset/FixationNet_150_Images/GazeLabel/', get_sequence_name(args.video)),
+                           get_video_timstamps()[args.videoIndex],
+                           get_start_timestamps()[args.videoIndex],
+                           ignore_images=model.model_type == 'no-images',
+                           is_pt=model.model_type in ['resnet', 'dino'],
+                           grayscale=model.model_type in ['saliency', 'flatten'])
     for idx in progressbar.progressbar(range(len(dataset))):
         x, y = dataset[idx]
         video_idx = dataset.get_video_idx(idx)
@@ -37,7 +40,9 @@ def main(args):
             pred = model(x.to('cuda').unsqueeze(0))
         image = vr[video_idx]
 
-        baseline_coord = CalcScreenCoordinates(x[0, :2])
+        baseline = x[:2] if model_type == FixationNetPL else x[0, :2]
+
+        baseline_coord = CalcScreenCoordinates(baseline)
         pred_coord = CalcScreenCoordinates(pred.flatten(0).to('cpu'))
         ground_truth_coord = CalcScreenCoordinates(y.flatten(0))
 

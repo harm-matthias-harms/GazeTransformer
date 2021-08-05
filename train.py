@@ -44,10 +44,6 @@ def main(args):
 
     trainer.test(best_model)
 
-    # possible improvements, when we need to run with small batchsize
-    # trainer = Trainer(accumulate_grad_batches=1)
-    # trainer = Trainer(auto_scale_batch_size=None|'power'|'binsearch'); trainer.tune(model)
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="GazeTransformer")

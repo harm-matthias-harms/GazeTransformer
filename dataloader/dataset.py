@@ -22,9 +22,6 @@ class TimeSequenceVideoDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def get_video_idx(self, idx):
-        return self.data[idx]['video']
-
     def __getitem__(self, idx):
         data_point = self.data[idx]
         if self.ignore_images:
@@ -35,6 +32,9 @@ class TimeSequenceVideoDataset(Dataset):
             torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label']])
         return sequence, label
+
+    def get_video_idx(self, idx):
+        return self.data[idx]['video']
 
     def feature_to_sequence(self, feature, images):
         gazes = torch.reshape(feature[:80], (40, 2))
@@ -68,6 +68,9 @@ class FixationnetVideoDataset(Dataset):
             torch.FloatTensor(data_point['sequence']), images)
         label = torch.FloatTensor([data_point['label']])
         return sequence, label
+
+    def get_video_idx(self, idx):
+        return self.data[idx]['video']
 
     def feature_to_sequence(self, feature, images):
         images = images.flatten(1)
