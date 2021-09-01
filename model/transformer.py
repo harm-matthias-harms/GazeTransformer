@@ -64,7 +64,7 @@ class GazeTransformer(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         src, y = batch
         pred = self(src)
-        val_loss = self.loss(pred, y)
+        val_loss = self.angular_loss(pred, y)
         self.log('val_loss', val_loss)
         return val_loss
 
