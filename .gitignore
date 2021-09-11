@@ -111,3 +111,4 @@ lightning_logs/
 **/checkpoints/
 train.sh
 examples/
+test.sh

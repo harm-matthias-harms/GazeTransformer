@@ -1,5 +1,7 @@
 from typing_extensions import Literal
 import os
+import progressbar
+import torch
 from torch.optim import Adam
 import pytorch_lightning as pl
 
@@ -26,7 +28,8 @@ class FixationNetPL(pl.LightningModule):
                                                            is_user=self.cross_eval_type == 'user'),
                                     "clusterCenters.npy")
 
-        self.model = FixationNet(80, 80, 480, 1152, cluster_path, predict_delta=predict_delta)
+        self.model = FixationNet(
+            80, 80, 480, 1152, cluster_path, predict_delta=predict_delta)
         self.angular_loss = AngularLoss()
 
     def forward(self, x):
@@ -49,9 +52,21 @@ class FixationNetPL(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         x, y = batch
         pred = self(x)
-        test_loss = self.angular_loss(pred, y)
-        self.log('test_loss', test_loss)
-        return test_loss
+        return pred, y
+
+    def test_epoch_end(self, output_results):
+        preds = torch.Tensor([]).to('cuda')
+        ys = torch.Tensor([]).to('cuda')
+        for output in output_results:
+            preds = torch.cat((preds, output[0]), dim=0)
+            ys = torch.cat((ys, output[1]), dim=0)
+        all_loss = torch.zeros((ys.shape[0], 1)).to('cuda')
+        for i in progressbar.progressbar(range(ys.shape[0])):
+            all_loss[i] = self.angular_loss(preds[i], ys[i])
+        test_loss = all_loss.mean()
+        std = all_loss.std()
+        self.log("test_loss", test_loss)
+        self.log("std", std)
 
     def configure_optimizers(self):
         t_opt = Adam(self.parameters(), lr=1e-2, weight_decay=5e-5)
