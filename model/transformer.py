@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 from torch.optim import AdamW
 import pytorch_lightning as pl
+import progressbar
 
 from dataloader.loader import loadTrainingData, loadTestData, loadOriginalData, loadOriginalTestData
 from dataloader.utility import get_user_labels, get_scene_labels, get_original_data_path
@@ -71,9 +72,21 @@ class GazeTransformer(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         src, y = batch
         pred = self(src)
-        test_loss = self.angular_loss(pred, y)
-        self.log('test_loss', test_loss)
-        return test_loss
+        return pred, y
+
+    def test_epoch_end(self, output_results):
+        preds = torch.Tensor([]).to('cuda')
+        ys = torch.Tensor([]).to('cuda')
+        for output in output_results:
+            preds = torch.cat((preds, output[0]), dim=0)
+            ys = torch.cat((ys, output[1]), dim=0)
+        all_loss = torch.zeros((ys.shape[0], 1)).to('cuda')
+        for i in progressbar.progressbar(range(ys.shape[0])):
+            all_loss[i] = self.angular_loss(preds[i], ys[i])
+        test_loss = all_loss.mean()
+        std = all_loss.std()
+        self.log("test_loss", test_loss)
+        self.log("std", std)
 
     def configure_optimizers(self):
         t_opt = AdamW(self.parameters(), lr=self.learning_rate)
