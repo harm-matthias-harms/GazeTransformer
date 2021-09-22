@@ -6,16 +6,17 @@ from .video import InMemoryVideoParser, PTVideoParser
 
 
 class TimeSequenceVideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, grayscale=False, ignore_images=False, is_pt=False):
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, grayscale=False, ignore_images=False, is_pt=False, use_all_images=False):
         self.ignore_images = ignore_images
+        self.use_all_images = use_all_images
 
         if not self.ignore_images:
             if is_pt:
                 self.video = PTVideoParser(
-                    video_path, base_timestamp, start_timestamp)
+                    video_path, base_timestamp, start_timestamp, use_all_images)
             else:
                 self.video = InMemoryVideoParser(
-                    video_path, base_timestamp, start_timestamp, grayscale)
+                    video_path, base_timestamp, start_timestamp, grayscale, use_all_images)
         with open(sequence_path, 'rb') as f:
             self.data = dill.load(f)
 
@@ -41,18 +42,21 @@ class TimeSequenceVideoDataset(Dataset):
         head = torch.reshape(feature[80:160], (40, 2))
         task = torch.reshape(feature[160: 640], (40, 12))
         if not self.ignore_images:
-            images = images.flatten(1)
-            # time descending, last image -> first image
-            images = torch.cat(
-                (images[-1].repeat(20, 1), images[0].repeat(20, 1)))
-            # flip to create an ascending time series
-            return torch.cat((gazes, head, task, images), 1).flip([0])
+            if self.use_all_images:
+                return torch.cat((gazes, head, task, images), 1).flip([0])
+            else:
+                images = images.flatten(1)
+                # time descending, last image -> first image
+                images = torch.cat(
+                    (images[-1].repeat(20, 1), images[0].repeat(20, 1)))
+                # flip to create an ascending time series
+                return torch.cat((gazes, head, task, images), 1).flip([0])
         # flip to create an ascending time series
         return torch.cat((gazes, head, task), 1).flip([0])
 
 
 class FixationnetVideoDataset(Dataset):
-    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, grayscale=False, ignore_images=False, is_pt=False):
+    def __init__(self, video_path, sequence_path, base_timestamp, start_timestamp, grayscale=False, ignore_images=False, is_pt=False, use_all_images=False):
         self.video = InMemoryVideoParser(
             video_path, base_timestamp, start_timestamp, grayscale)
         with open(sequence_path, 'rb') as f:

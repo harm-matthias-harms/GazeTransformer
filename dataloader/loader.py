@@ -8,7 +8,7 @@ from .utility import get_filenames, get_start_timestamps, get_video_timstamps, g
 from .dataset import TimeSequenceVideoDataset, FixationnetVideoDataset, FixationnetDataset
 
 
-def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', fixationnet=False):
+def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', fixationnet=False, use_all_images=False):
     datasets = []
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
@@ -28,7 +28,8 @@ def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-im
                 start_timestamps[idx],
                 grayscale=mode in ['saliency', 'flatten'],
                 ignore_images=mode == 'no-images',
-                is_pt=mode in ['resnet', 'dino']
+                is_pt=mode in ['resnet', 'dino'],
+                use_all_images=use_all_images
             )
             datasets.append(dataset)
 
@@ -36,7 +37,7 @@ def loadTrainingData(should_train, batch_size, num_workers, mode: Literal['no-im
     return DataLoader(dataset=concatenated_datasets, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
-def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', fixationnet=False):
+def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'no-images', sequence_prefix='../dataset/dataset/FixationNet_150_Images/GazeLabel/', fixationnet=False, use_all_images=False):
     datasets = []
     filenames = get_filenames()
     video_timestamps = get_video_timstamps()
@@ -56,7 +57,8 @@ def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images
                 start_timestamps[idx],
                 grayscale=mode in ['saliency', 'flatten'],
                 ignore_images=mode == 'no-images',
-                is_pt=mode in ['resnet', 'dino']
+                is_pt=mode in ['resnet', 'dino'],
+                use_all_images=use_all_images
             )
             datasets.append(dataset)
 
@@ -65,16 +67,22 @@ def loadTestData(should_train, batch_size, num_workers, mode: Literal['no-images
 
 
 def loadOriginalData(path, batch_size, num_workers, as_sequence=False, ignore_images=False):
-    dataset_path = os.path.join(os.path.dirname(__file__), "../dataset/dataset/", path)
-    trainingX = torch.from_numpy(np.load(dataset_path + 'trainingX.npy')).float()
-    trainingY = torch.from_numpy(np.load(dataset_path + 'trainingY.npy')).float()
+    dataset_path = os.path.join(os.path.dirname(
+        __file__), "../dataset/dataset/", path)
+    trainingX = torch.from_numpy(
+        np.load(dataset_path + 'trainingX.npy')).float()
+    trainingY = torch.from_numpy(
+        np.load(dataset_path + 'trainingY.npy')).float()
 
-    dataset = FixationnetDataset(trainingX, trainingY, as_sequence, ignore_images)
+    dataset = FixationnetDataset(
+        trainingX, trainingY, as_sequence, ignore_images)
     return DataLoader(dataset=dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True, drop_last=True)
 
 
 def loadOriginalTestData(path, batch_size, num_workers, as_sequence=False, ignore_images=False):
-    dataset_path = os.path.join(os.path.dirname(__file__), "../dataset/dataset/", path)#FixationNet_150_CrossUser/FixationNet_150_User1/")
+    # FixationNet_150_CrossUser/FixationNet_150_User1/")
+    dataset_path = os.path.join(os.path.dirname(
+        __file__), "../dataset/dataset/", path)
     testX = torch.from_numpy(np.load(dataset_path + 'testX.npy')).float()
     testY = torch.from_numpy(np.load(dataset_path + 'testY.npy')).float()
 

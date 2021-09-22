@@ -13,7 +13,7 @@ from .head import Head
 
 
 class GazeTransformer(pl.LightningModule):
-    def __init__(self, predict_delta=False, image_to_features=True, pos_kernel_size=8, nhead=8, num_layers=6, backbone_features=128, inner_head_features=128, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1):
+    def __init__(self, predict_delta=False, image_to_features=True, pos_kernel_size=8, nhead=8, num_layers=6, backbone_features=128, inner_head_features=128, learning_rate=0.001, batch_size=1, num_worker=0, model_type: Literal['original', 'original-no-images', 'no-images', 'saliency', 'flatten', 'patches', 'resnet', 'dino'] = 'original', loss: Literal['angular', 'mse'] = 'angular', cross_eval_type: Literal['user', 'scene'] = 'user', cross_eval_exclude=1, use_all_images=False):
         super().__init__()
         self.save_hyperparameters()
         self.pos_kernel_size = pos_kernel_size
@@ -23,6 +23,7 @@ class GazeTransformer(pl.LightningModule):
         self.model_type = model_type
         self.cross_eval_type = cross_eval_type
         self.cross_eval_exclude = cross_eval_exclude
+        self.use_all_images = use_all_images
         self.backbone_features = backbone_features
         self.image_to_features = image_to_features
         self.set_feature_and_backbone_number()
@@ -95,17 +96,17 @@ class GazeTransformer(pl.LightningModule):
     def train_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
             return loadOriginalData(get_original_data_path(self.cross_eval_exclude, is_user=self.cross_eval_type == 'user'), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
-        return loadTrainingData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type)
+        return loadTrainingData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type, use_all_images=self.use_all_images)
 
     def val_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
             return loadOriginalTestData(get_original_data_path(self.cross_eval_exclude, is_user=self.cross_eval_type == 'user'), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
-        return loadTestData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type)
+        return loadTestData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type, use_all_images=self.use_all_images)
 
     def test_dataloader(self):
         if self.model_type in ['original-no-images', 'original']:
             return loadOriginalTestData(get_original_data_path(self.cross_eval_exclude, is_user=self.cross_eval_type == 'user'), self.batch_size, self.num_worker, True, self.model_type == 'original-no-images')
-        return loadTestData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type)
+        return loadTestData(self.cross_eval_labels(), self.batch_size, self.num_worker, self.model_type, use_all_images=self.use_all_images)
 
     def cross_eval_labels(self):
         if self.cross_eval_type == 'user':
