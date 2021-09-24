@@ -32,17 +32,12 @@ def main(args):
                             image_to_features=args.imageToFeature, backbone_features=args.backboneFeatures,
                             inner_head_features=args.innerHeadFeatures, learning_rate=args.learningRate,
                             batch_size=args.batchSize, num_worker=args.worker,
-                            cross_eval_type=args.crossEvalType, cross_eval_exclude=args.crossEvalExclude)
+                            cross_eval_type=args.crossEvalType, cross_eval_exclude=args.crossEvalExclude, use_all_images=args.useAllImages)
     trainer = pl.Trainer(
         gpus=-1, callbacks=[early_stopping_callback, model_checkpoint_callback],
         limit_train_batches=args.limitTrainBatches, resume_from_checkpoint=resume_from_checkpoint)
 
     trainer.fit(model)
-
-    best_model = model.load_from_checkpoint(
-        model_checkpoint_callback.best_model_path)
-
-    trainer.test(best_model)
 
 
 if __name__ == '__main__':
@@ -55,6 +50,8 @@ if __name__ == '__main__':
                         help="type for the cross evaluation: user | scene (default: user)")
     parser.add_argument('--crossEvalExclude', default=1, type=int,
                         help="the set to exclude: user: 1 | 2 | 3, scene: 1 | 2 | 3 | 4 (default: 1)")
+    parser.add_argument('--useAllImages', default=False, type=bool,
+                        help="use frames closest to data, instead of -400ms and -200ms (default: False)")
     parser.add_argument('-nh', '--nheads', default=8, type=int,
                         help="nhead of the transformer (default: 8)")
     parser.add_argument('-nl', '--numLayers', default=6, type=int,

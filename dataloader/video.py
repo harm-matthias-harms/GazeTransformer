@@ -28,12 +28,18 @@ class VideoParser():
         batch = self.vr.get_batch([idx - 24, idx - 12])
         return batch.permute(0, 3, 1, 2).float() / 255.0
 
+
 class InMemoryVideoParser():
-    def __init__(self, path, video_timestamp, start_timestamp, grayscale):
+    def __init__(self, path, video_timestamp, start_timestamp, grayscale, use_all_images=False):
         self.begin_timestamp = video_timestamp
         self.data = read_video(path)[0]
         if grayscale:
-            self.data = self.data[:, :, :, :1] # only keep one channel because of greyscale video
+            # only keep one channel because of greyscale video
+            self.data = self.data[:, :, :, :1]
+        self.base_indices = torch.tensor([24, 12])
+        if use_all_images:
+            self.base_indices = torch.flip(torch.round(
+                torch.arange(0, 40) / (1000 / 60.0) * 10), dims=[0]).type(torch.int32)
         self.data = self.data.permute(0, 3, 1, 2).float() / 255.0
 
         self.actual_start_index = round(
@@ -51,13 +57,19 @@ class InMemoryVideoParser():
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
 
-        indices = torch.tensor([idx - 24, idx - 12])
+        indices = idx - self.base_indices
         return self.data.index_select(0, indices)
 
+
 class PTVideoParser():
-    def __init__(self, path, video_timestamp, start_timestamp):
+    def __init__(self, path, video_timestamp, start_timestamp, use_all_images=False):
         self.begin_timestamp = video_timestamp
         self.data = torch.load(path)
+
+        self.base_indices = torch.tensor([24, 12])
+        if use_all_images:
+            self.base_indices = torch.flip(torch.round(
+                torch.arange(0, 40) / (1000 / 60.0) * 10), dims=[0]).type(torch.int32)
 
         self.actual_start_index = round(
             (start_timestamp - video_timestamp) / (1000 / 60.0))
@@ -74,5 +86,5 @@ class PTVideoParser():
     def get_frames(self, idx):
         idx += 24 + self.actual_start_index
 
-        indices = torch.tensor([idx - 24, idx - 12])
+        indices = idx - self.base_indices
         return self.data.index_select(0, indices)
