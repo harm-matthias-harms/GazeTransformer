@@ -1,6 +1,10 @@
 # GazeTransformer: Egocentric Gaze Forecasting with Transformers
 This repository contains the source code for my [Masterthesis](https://drive.google.com/file/d/1HMXRWQW_EImSi00U5RxdOEqee1yyxS6v/view?usp=sharing). The checkpoints used for the comparison in the evaluation can be found in this [folder](https://drive.google.com/drive/folders/10Xq1S9SJA7XwYjRe-4d8AB0d0pNnoMag?usp=sharing).
 
+## Citation
+
+Tim Rolff, H. Matthias Harms, Frank Steinicke, Simone Frintrop: GazeTransformer: Gaze Forecasting for Virtual Reality Using Transformer Networks, Pattern Recognition. DAGM GCPR 2022, Lecture Notes in Computer Science, vol 13485. Springer, [[PDF]](https://www.inf.uni-hamburg.de/en/inst/ab/cv/media/rolff-etal-gaze-forecasting-gcpr2022.pdf)
+
 
 ## Abstract
 
